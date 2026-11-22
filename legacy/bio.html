@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeaZ Review | Săn Deal Chuẩn (@teaz_shop)</title>
+    <meta name="description" content="Review có tâm – Chọn đồ chất lượng. Tổng hợp Deal hời TikTok Shop & Shopee từ TeaZ Shop.">
+    
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        tea: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        cream: '#fafaf7'
+                    },
+                    animation: {
+                        'float-slow': 'float 6s ease-in-out infinite',
+                        'pulse-soft': 'pulseSoft 2.5s infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-8px) rotate(4deg)' },
+                        },
+                        pulseSoft: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.02)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Hiệu ứng lá trà rơi nhẹ nhàng ở nền */
+        .tea-leaf-particle {
+            position: fixed;
+            top: -10%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.35;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0vh) rotate(0deg) translateX(0px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.35;
+            }
+            90% {
+                opacity: 0.25;
+            }
+            100% {
+                transform: translateY(110vh) rotate(360deg) translateX(30px);
+                opacity: 0;
+            }
+        }
+
+        /* Ẩn thanh cuộn ngang cho bộ lọc */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Hiệu ứng ánh sáng lướt qua nút nổi bật */
+        .shimmer-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            animation: shimmer 3.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { left: -100%; }
+            40%, 100% { left: 200%; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-tea-50 via-cream to-stone-100 text-slate-800 min-h-screen antialiased selection:bg-tea-200 selection:text-tea-900 relative overflow-x-hidden">
+
+    <!-- Container chứa hiệu ứng lá trà rơi -->
+    <div id="leaf-container" aria-hidden="true"></div>
+
+    <!-- Thanh cảnh báo thông minh khi mở bằng Trình duyệt trong ứng dụng (TikTok / Facebook) -->
+    <div id="inapp-banner" class="hidden sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md text-white px-4 py-3 shadow-lg border-b border-tea-500/30">
+        <div class="max-w-[480px] mx-auto flex items-start gap-3">
+            <div class="bg-tea-500/20 text-tea-400 p-2 rounded-xl shrink-0 mt-0.5">
+                <i data-lucide="external-link" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1 text-xs leading-relaxed">
+                <p class="font-semibold text-tea-300 text-sm mb-0.5">Mở bằng trình duyệt ngoài để áp mã Shopee!</p>
+                <p class="text-slate-300">Bấm dấu <span class="inline-block bg-white/15 px-1.5 py-0.5 rounded font-bold text-white">•••</span> ở góc trên bên phải $\rightarrow$ chọn <span class="underline font-semibold text-white">Mở bằng trình duyệt (Safari/Chrome)</span> để tự nhảy sang App Shopee.</p>
+            </div>
+            <button onclick="document.getElementById('inapp-banner').classList.add('hidden')" class="text-slate-400 hover:text-white p-1" aria-label="Đóng thông báo">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Khung nội dung chính chuẩn Mobile-First (Max-width 480px) -->
+    <main class="relative z-10 max-w-[480px] mx-auto px-4 pt-6 pb-20">
+        
+        <!-- Thanh công cụ nhanh trên cùng (Share & Toggle hiệu ứng) -->
+        <div class="flex items-center justify-between mb-4">
+            <button onclick="toggleLeaves()" id="leaf-toggle-btn" title="Bật/Tắt hiệu ứng lá trà" class="flex items-center gap-1.5 text-xs font-medium text-tea-800 bg-white/80 hover:bg-white backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-tea-100 transition">
+                <span>🍃</span>
+                <span id="leaf-status-text">Hiệu ứng: Bật</span>
+            </button>
+
+            <div class="flex items-center gap-2">
+                <button onclick="openAdminModal()" title="Chỉnh sửa nhanh & Xuất file HTML" class="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-tea-700 bg-white/80 hover:bg-white backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-slate-200/70 transition">
+                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+                    <span>Tùy chỉnh</span>
+                </button>
+                <button onclick="shareBioPage()" title="Chia sẻ trang Bio" class="p-2 text-slate-700 hover:text-tea-700 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full shadow-sm border border-slate-200/70 transition">
+                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Phần Header Hồ Sơ Thương Hiệu -->
+        <header class="text-center mb-7">
+            <!-- Avatar Logo TeaZ cách điệu -->
+            <div class="relative inline-block mb-3.5 group">
+                <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-tea-700 via-tea-600 to-emerald-400 p-1 shadow-lg shadow-tea-600/20 mx-auto transition-transform duration-300 group-hover:scale-105">
+                    <div class="w-full h-full rounded-full bg-white flex flex-col items-center justify-center relative overflow-hidden">
+                        <!-- Nền họa tiết nhẹ -->
+                        <div class="absolute inset-0 bg-tea-50/60"></div>
+                        <!-- Icon Lá trà SVG -->
+                        <svg class="w-7 h-7 text-tea-600 relative z-10 -mb-0.5 animate-float-slow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" fill="#dcfce7"/>
+                            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                        </svg>
+                        <span class="font-display font-extrabold text-xl tracking-tight text-tea-900 relative z-10">TeaZ</span>
+                    </div>
+                </div>
+                <!-- Huy hiệu xác thực xanh -->
+                <div class="absolute bottom-0.5 right-0.5 bg-tea-600 text-white p-1 rounded-full border-2 border-white shadow-sm" title="Kênh Review Chính Thức">
+                    <i data-lucide="badge-check" class="w-4 h-4"></i>
+                </div>
+            </div>
+
+            <!-- Tên kênh & Handle -->
+            <h1 id="display-brand-name" class="font-display font-extrabold text-xl text-slate-900 tracking-tight">
+                TeaZ Review | Săn Deal Chuẩn
+            </h1>
+            <p class="text-xs font-semibold text-tea-700 mt-1 flex items-center justify-center gap-1.5">
+                <span id="display-handle">@teaz_shop</span>
+                <span class="w-1 h-1 rounded-full bg-tea-400"></span>
+                <span class="bg-tea-100 text-tea-800 px-2 py-0.5 rounded-full text-[11px]">1.2K+ Followers</span>
+            </p>
+
+            <!-- Bio mô tả ngắn -->
+            <p id="display-bio" class="text-sm text-slate-600 mt-2.5 max-w-[380px] mx-auto leading-relaxed">
+                Review có tâm – Chọn đồ chất lượng 🍃<br>
+                Tổng hợp Deal hời TikTok Shop &amp; Shopee mỗi ngày
+            </p>
+
+            <!-- Thanh biểu tượng mạng xã hội nhanh -->
+            <div class="flex items-center justify-center gap-3 mt-4">
+                <a id="social-tiktok" href="https://www.tiktok.com/@teaz_shop" target="_blank" rel="noopener noreferrer" aria-label="TikTok TeaZ Shop" class="w-10 h-10 rounded-full bg-white hover:bg-slate-900 text-slate-800 hover:text-white flex items-center justify-center shadow-sm border border-slate-200/80 transition-all hover:-translate-y-0.5">
+                    <!-- TikTok SVG Icon -->
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                </a>
+                <a id="social-facebook" href="https://www.facebook.com/teaz.code" target="_blank" rel="noopener noreferrer" aria-label="Facebook TeaZ Code" class="w-10 h-10 rounded-full bg-white hover:bg-blue-600 text-slate-800 hover:text-white flex items-center justify-center shadow-sm border border-slate-200/80 transition-all hover:-translate-y-0.5">
+                    <i data-lucide="facebook" class="w-4 h-4"></i>
+                </a>
+                <button onclick="openShopeeSmartLink()" aria-label="Bộ sưu tập Shopee" class="w-10 h-10 rounded-full bg-white hover:bg-orange-500 text-slate-800 hover:text-white flex items-center justify-center shadow-sm border border-slate-200/80 transition-all hover:-translate-y-0.5">
+                    <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                </button>
+                <button onclick="openContactModal()" aria-label="Liên hệ hợp tác" class="w-10 h-10 rounded-full bg-white hover:bg-tea-600 text-slate-800 hover:text-white flex items-center justify-center shadow-sm border border-slate-200/80 transition-all hover:-translate-y-0.5">
+                    <i data-lucide="mail" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Danh sách các nút CTA chính -->
+        <section aria-label="Liên kết chính" class="space-y-3.5 mb-8">
+            
+            <!-- 1. Highlight Card: Bộ Sưu Tập Shopee (Nổi bật nhất) -->
+            <button onclick="openShopeeSmartLink()" class="w-full text-left group relative block rounded-2xl bg-gradient-to-r from-tea-700 via-tea-600 to-emerald-600 p-4 text-white shadow-lg shadow-tea-700/25 hover:shadow-xl hover:shadow-tea-700/30 transition-all duration-200 hover:-translate-y-0.5 shimmer-btn">
+                <!-- Badge HOT DEAL -->
+                <span class="absolute -top-2.5 right-4 bg-amber-400 text-slate-950 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                    <i data-lucide="flame" class="w-3 h-3 fill-orange-600 text-orange-600"></i>
+                    HOT DEAL
+                </span>
+                
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0 border border-white/20 group-hover:scale-105 transition-transform">
+                        <span class="text-2xl">🛍️</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="font-display font-bold text-base text-white truncate">
+                            Bộ Sưu Tập Đồ Hay Trên Shopee
+                        </h2>
+                        <p class="text-xs text-tea-100 mt-0.5 line-clamp-1">
+                            Tổng hợp toàn bộ sản phẩm đã review &amp; mã giảm giá
+                        </p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0 group-hover:translate-x-1 transition-transform">
+                        <i data-lucide="arrow-up-right" class="w-4 h-4 text-white"></i>
+                    </div>
+                </div>
+            </button>
+
+            <!-- 2. TikTok Shop Showcase Card -->
+            <a id="cta-tiktok-link" href="https://www.tiktok.com/@teaz_shop" target="_blank" rel="noopener noreferrer" class="group block rounded-2xl bg-white/95 hover:bg-white p-3.5 shadow-sm hover:shadow-md border border-tea-100/80 transition-all duration-200 hover:-translate-y-0.5">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        <span class="text-xl">🎵</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <h2 class="font-display font-bold text-[15px] text-slate-900 truncate">
+                                Giỏ Hàng TikTok Shop (@teaz_shop)
+                            </h2>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5 truncate">
+                            Xem video review thực tế &amp; săn voucher Live
+                        </p>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 group-hover:text-tea-600 group-hover:translate-x-0.5 transition-all shrink-0"></i>
+                </div>
+            </a>
+
+            <!-- 3. Facebook Page Card -->
+            <a id="cta-facebook-link" href="https://www.facebook.com/teaz.code" target="_blank" rel="noopener noreferrer" class="group block rounded-2xl bg-white/95 hover:bg-white p-3.5 shadow-sm hover:shadow-md border border-tea-100/80 transition-all duration-200 hover:-translate-y-0.5">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 group-hover:scale-105 transition-transform">
+                        <span class="text-xl">📘</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="font-display font-bold text-[15px] text-slate-900 truncate">
+                            TeaZ Code &amp; Chia Sẻ Công Nghệ
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5 truncate">
+                            Mẹo hay công nghệ, tự động hóa AI &amp; deal công nghệ
+                        </p>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 group-hover:text-tea-600 group-hover:translate-x-0.5 transition-all shrink-0"></i>
+                </div>
+            </a>
+
+            <!-- 4. Nhận thông báo Deal / Booking Review -->
+            <button onclick="openContactModal()" class="w-full text-left group block rounded-2xl bg-white/95 hover:bg-white p-3.5 shadow-sm hover:shadow-md border border-tea-100/80 transition-all duration-200 hover:-translate-y-0.5">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-tea-50 text-tea-700 flex items-center justify-center shrink-0 border border-tea-200/70 group-hover:scale-105 transition-transform">
+                        <span class="text-xl">💬</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="font-display font-bold text-[15px] text-slate-900 truncate">
+                            Nhắn Tin / Booking Review Sản Phẩm
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5 truncate">
+                            Hợp tác nhãn hàng &amp; hỗ trợ tìm link sản phẩm nhanh
+                        </p>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 group-hover:text-tea-600 group-hover:translate-x-0.5 transition-all shrink-0"></i>
+                </div>
+            </button>
+
+        </section>
+
+        <!-- Khu vực Sản Phẩm Nổi Bật (Featured Picks) -->
+        <section aria-label="Sản phẩm nổi bật" class="bg-white/85 backdrop-blur-md rounded-3xl p-4 shadow-sm border border-tea-100">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-5 rounded-full bg-tea-600"></span>
+                    <h2 class="font-display font-bold text-base text-slate-900">Sản Phẩm Đã Review</h2>
+                </div>
+                <span class="text-[11px] font-medium text-tea-700 bg-tea-50 px-2.5 py-1 rounded-full border border-tea-200/60">
+                    Link chính hãng
+                </span>
+            </div>
+
+            <!-- Thanh tìm kiếm nhanh sản phẩm -->
+            <div class="relative mb-3">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                <input 
+                    type="text" 
+                    id="product-search" 
+                    oninput="filterProducts()" 
+                    placeholder="Tìm tên sản phẩm (vd: xịt khoáng d'Alba, nồi Redchef...)" 
+                    class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-tea-500/30 focus:border-tea-500 transition placeholder:text-slate-400"
+                >
+            </div>
+
+            <!-- Bộ lọc danh mục nhanh -->
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-3 mb-1">
+                <button onclick="setCategory('all', this)" class="cat-btn active shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-tea-600 text-white shadow-sm transition">
+                    Tất cả
+                </button>
+                <button onclick="setCategory('beauty', this)" class="cat-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-tea-50 hover:text-tea-700 transition">
+                    ✨ Làm đẹp
+                </button>
+                <button onclick="setCategory('home', this)" class="cat-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-tea-50 hover:text-tea-700 transition">
+                    🍳 Gia dụng
+                </button>
+                <button onclick="setCategory('fashion', this)" class="cat-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-tea-50 hover:text-tea-700 transition">
+                    👕 Thời trang
+                </button>
+                <button onclick="setCategory('tech', this)" class="cat-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-tea-50 hover:text-tea-700 transition">
+                    ⚡ Công nghệ
+                </button>
+            </div>
+
+            <!-- Danh sách thẻ sản phẩm (Render bằng JS) -->
+            <div id="product-list" class="space-y-3"></div>
+
+            <!-- Thông báo khi không tìm thấy sản phẩm -->
+            <div id="empty-state" class="hidden text-center py-8">
+                <p class="text-sm font-medium text-slate-500">Không tìm thấy sản phẩm khớp từ khóa.</p>
+                <button onclick="resetFilters()" class="mt-2 text-xs font-semibold text-tea-600 hover:underline">Xem lại tất cả sản phẩm</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center mt-8 space-y-2">
+            <p class="text-[11px] text-slate-400">
+                © 2026 <strong class="text-slate-600">TeaZ Review (@teaz_shop)</strong> • Chọn lọc &amp; Chia sẻ trải nghiệm thực tế
+            </p>
+            <div class="flex items-center justify-center gap-3 text-[11px] text-slate-500">
+                <button onclick="copyBioUrl()" class="hover:text-tea-700 underline decoration-dotted">Sao chép link Bio</button>
+                <span>•</span>
+                <button onclick="downloadStandaloneHTML()" class="hover:text-tea-700 underline decoration-dotted font-medium text-tea-700">Tải file index.html</button>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Toast Thông Báo Nhỏ -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-xl opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 whitespace-nowrap">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-tea-400"></i>
+        <span id="toast-message">Đã sao chép liên kết!</span>
+    </div>
+
+    <!-- Modal Liên Hệ / Booking Review -->
+    <div id="contact-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white w-full max-w-[420px] rounded-3xl p-5 shadow-2xl border border-tea-100 animate-[fadeIn_0.2s_ease-out]">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-tea-100 text-tea-700 flex items-center justify-center">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    </span>
+                    <h3 class="font-display font-bold text-base text-slate-900">Liên Hệ &amp; Booking Review</h3>
+                </div>
+                <button onclick="closeModal('contact-modal')" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                Nhãn hàng cần gửi mẫu trải nghiệm, booking video TikTok Shop hoặc bạn cần tìm link deal sản phẩm nào, nhắn trực tiếp cho TeaZ qua các kênh dưới đây nhé:
+            </p>
+
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
+                    <div class="min-w-0">
+                        <p class="text-[11px] text-slate-400 font-medium">Email hợp tác / Booking</p>
+                        <p id="contact-email-text" class="text-xs font-bold text-slate-800 truncate">booking@vinhanadv.online</p>
+                    </div>
+                    <button onclick="copyText('booking@vinhanadv.online', 'Đã sao chép Email liên hệ!')" class="shrink-0 bg-tea-600 hover:bg-tea-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition">
+                        Copy
+                    </button>
+                </div>
+
+                <a href="https://www.facebook.com/teaz.code" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3 rounded-2xl bg-blue-50/70 hover:bg-blue-50 border border-blue-100 transition">
+                    <div class="flex items-center gap-2.5">
+                        <i data-lucide="message-circle" class="w-5 h-5 text-blue-600"></i>
+                        <div>
+                            <p class="text-xs font-bold text-slate-900">Nhắn qua Fanpage TeaZ Code</p>
+                            <p class="text-[11px] text-slate-500">Phản hồi nhanh trong ngày</p>
+                        </div>
+                    </div>
+                    <i data-lucide="external-link" class="w-4 h-4 text-blue-600"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tùy Chỉnh Nhanh Cho Chủ Kênh (Xuất file HTML sạch để Deploy) -->
+    <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white w-full max-w-[440px] rounded-3xl p-5 shadow-2xl border border-tea-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-tea-100 text-tea-700 flex items-center justify-center">
+                        <i data-lucide="wrench" class="w-4 h-4"></i>
+                    </span>
+                    <div>
+                        <h3 class="font-display font-bold text-base text-slate-900">Tùy Chỉnh &amp; Xuất File Deploy</h3>
+                        <p class="text-[11px] text-slate-500">Chỉnh sửa trực tiếp và tải file HTML lên Vercel / Hosting</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('admin-modal')" class="p-1.5 rounded-full hover:bg-slate-100 text-slate-500">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Tên hiển thị kênh</label>
+                    <input id="edit-brand" type="text" value="TeaZ Review | Săn Deal Chuẩn" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-tea-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Link Bộ Sưu Tập Shopee (My Collection)</label>
+                    <input id="edit-shopee" type="url" value="https://collshp.com/phancongtra" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-tea-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Link Kênh TikTok</label>
+                    <input id="edit-tiktok" type="url" value="https://www.tiktok.com/@teaz_shop" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-tea-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Link Fanpage Facebook</label>
+                    <input id="edit-fb" type="url" value="https://www.facebook.com/teaz.code" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-tea-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Email Booking (Tên miền riêng)</label>
+                    <input id="edit-email" type="email" value="booking@vinhanadv.online" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-tea-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5 mt-5">
+                <button onclick="applyQuickEdits()" class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition">
+                    Áp dụng xem trước
+                </button>
+                <button onclick="applyQuickEdits(); downloadStandaloneHTML();" class="py-2.5 px-3 rounded-xl bg-tea-600 hover:bg-tea-700 text-white font-semibold text-xs shadow-sm flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span>Tải index.html</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cấu hình dữ liệu trung tâm (Dễ dàng thay đổi)
+        const BIO_CONFIG = {
+            brandName: "TeaZ Review | Săn Deal Chuẩn",
+            handle: "@teaz_shop",
+            shopeeCollectionUrl: "https://collshp.com/phancongtra",
+            tiktokProfileUrl: "https://www.tiktok.com/@teaz_shop",
+            facebookPageUrl: "https://www.facebook.com/teaz.code",
+            bookingEmail: "booking@vinhanadv.online"
+        };
+
+        // Danh sách sản phẩm tiêu biểu trên kênh
+        const PRODUCTS = [
+            {
+                id: 1,
+                name: "Xịt Khoáng Serum d'Alba White Truffle",
+                category: "beauty",
+                categoryLabel: "Làm đẹp",
+                desc: "Cấp ẩm căng bóng 2 lớp tinh chất nấm Truffle trắng, tia sương siêu mịn.",
+                badge: "Bán chạy #1",
+                icon: "✨",
+                accentBg: "bg-amber-50 text-amber-600 border-amber-200/70",
+                shopeeUrl: "https://collshp.com/phancongtra",
+                tiktokUrl: "https://www.tiktok.com/@teaz_shop"
+            },
+            {
+                id: 2,
+                name: "Bộ Nồi Chảo Redchef Cán Tháo Rời",
+                category: "home",
+                categoryLabel: "Gia dụng",
+                desc: "Chống dính gốm an toàn, tháo cán xếp gọn tiết kiệm 70% diện tích bếp.",
+                badge: "Deal Hời",
+                icon: "🍳",
+                accentBg: "bg-rose-50 text-rose-600 border-rose-200/70",
+                shopeeUrl: "https://collshp.com/phancongtra",
+                tiktokUrl: "https://www.tiktok.com/@teaz_shop"
+            },
+            {
+                id: 3,
+                name: "Áo Thun Nam Cổ Trụ / Polo Tối Giản",
+                category: "fashion",
+                categoryLabel: "Thời trang",
+                desc: "Chất vải thoáng mát, co giãn nhẹ, form đứng dáng dễ phối đi làm & đi chơi.",
+                badge: "Gợi ý",
+                icon: "👕",
+                accentBg: "bg-slate-100 text-slate-700 border-slate-200",
+                shopeeUrl: "https://collshp.com/phancongtra",
+                tiktokUrl: "https://www.tiktok.com/@teaz_shop"
+            },
+            {
+                id: 4,
+                name: "Phụ Kiện Setup Bàn Làm Việc & Cáp Sạc Nhanh",
+                category: "tech",
+                categoryLabel: "Công nghệ",
+                desc: "Cáp truyền dữ liệu tốc độ cao & phụ kiện gọn góc làm việc đa thiết bị.",
+                badge: "Mới",
+                icon: "⚡",
+                accentBg: "bg-sky-50 text-sky-600 border-sky-200/70",
+                shopeeUrl: "https://collshp.com/phancongtra",
+                tiktokUrl: "https://www.tiktok.com/@teaz_shop"
+            }
+        ];
+
+        let currentCategory = 'all';
+        let leavesEnabled = true;
+
+        // 1. Khởi tạo Icon & Kiểm tra In-App Browser khi tải trang
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            detectInAppBrowser();
+            renderProducts();
+            createFallingLeaves();
+        });
+
+        // 2. Phát hiện trình duyệt trong ứng dụng TikTok / Facebook để hiện banner hướng dẫn
+        function detectInAppBrowser() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isTikTok = /TikTok|BytedanceWebview|musical_ly/i.test(ua);
+            const isFacebook = /FBAN|FBAV|FB_IAB/i.test(ua);
+            
+            if (isTikTok || isFacebook) {
+                document.getElementById('inapp-banner').classList.remove('hidden');
+            }
+        }
+
+        // 3. Cơ chế mở thông minh Shopee (Ưu tiên kích hoạt App Shopee trên mobile, fallback về web)
+        function openShopeeSmartLink(customUrl) {
+            const targetUrl = customUrl || BIO_CONFIG.shopeeCollectionUrl;
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+            if (isMobile) {
+                // Thử gọi deep link mở App Shopee trên điện thoại
+                const now = Date.now();
+                window.location.href = `shopeevn://reactPath?tab=buy&path=shopee/HOME`;
+                
+                // Sau 650ms nếu chưa chuyển sang app thì mở thẳng link Collection web
+                setTimeout(() => {
+                    if (Date.now() - now < 1500) {
+                        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                    }
+                }, 650);
+            } else {
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            }
+        }
+
+        // 4. Render danh sách thẻ sản phẩm
+        function renderProducts() {
+            const listEl = document.getElementById('product-list');
+            const emptyEl = document.getElementById('empty-state');
+            const searchQuery = document.getElementById('product-search').value.trim().toLowerCase();
+
+            const filtered = PRODUCTS.filter(item => {
+                const matchCat = currentCategory === 'all' || item.category === currentCategory;
+                const matchText = item.name.toLowerCase().includes(searchQuery) || 
+                                  item.desc.toLowerCase().includes(searchQuery) ||
+                                  item.categoryLabel.toLowerCase().includes(searchQuery);
+                return matchCat && matchText;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+
+            emptyEl.classList.add('hidden');
+            listEl.innerHTML = filtered.map(item => `
+                <article class="rounded-2xl bg-slate-50/90 hover:bg-white p-3.5 border border-slate-200/75 hover:border-tea-200 shadow-2xs transition-all">
+                    <div class="flex items-start gap-3">
+                        <div class="w-12 h-12 rounded-xl ${item.accentBg} border flex items-center justify-center text-2xl shrink-0">
+                            ${item.icon}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-bold uppercase tracking-wide text-tea-700 bg-tea-100/80 px-2 py-0.5 rounded-md">
+                                    ${item.badge}
+                                </span>
+                                <span class="text-[11px] text-slate-400">${item.categoryLabel}</span>
+                            </div>
+                            <h3 class="font-display font-bold text-sm text-slate-900 mt-1 leading-snug">
+                                ${item.name}
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                ${item.desc}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-slate-200/60">
+                        <button onclick="openShopeeSmartLink('${item.shopeeUrl}')" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-tea-600 hover:bg-tea-700 text-white text-xs font-semibold shadow-2xs transition">
+                            <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+                            <span>Mua tại Shopee</span>
+                        </button>
+                        <a href="${item.tiktokUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold transition">
+                            <i data-lucide="play-circle" class="w-3.5 h-3.5 text-slate-700"></i>
+                            <span>Xem Video Review</span>
+                        </a>
+                    </div>
+                </article>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        // 5. Lọc danh mục & tìm kiếm
+        function setCategory(cat, btnEl) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-tea-600', 'text-white', 'font-semibold', 'shadow-sm');
+                btn.classList.add('bg-slate-100', 'text-slate-600', 'font-medium');
+            });
+            btnEl.classList.remove('bg-slate-100', 'text-slate-600', 'font-medium');
+            btnEl.classList.add('bg-tea-600', 'text-white', 'font-semibold', 'shadow-sm');
+            renderProducts();
+        }
+
+        function filterProducts() {
+            renderProducts();
+        }
+
+        function resetFilters() {
+            document.getElementById('product-search').value = '';
+            const firstBtn = document.querySelector('.cat-btn');
+            setCategory('all', firstBtn);
+        }
+
+        // 6. Hiệu ứng lá trà rơi nhẹ nhàng ở nền
+        function createFallingLeaves() {
+            const container = document.getElementById('leaf-container');
+            container.innerHTML = '';
+            if (!leavesEnabled) return;
+
+            const leafSVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#22c55e" xmlns="http://www.w3.org/2000/svg"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22L6.66 19.7C7.14 19.87 7.64 20 8 20C19 20 22 3 22 3C21 5 14 5.25 9 6.25C4 7.25 2 11.5 2 13.5C2 15.5 3.75 17.25 3.75 17.25C7 8 17 8 17 8Z"/></svg>`;
+
+            for (let i = 0; i < 9; i++) {
+                const leaf = document.createElement('div');
+                leaf.className = 'tea-leaf-particle';
+                leaf.innerHTML = leafSVG;
+                leaf.style.left = `${Math.random() * 95}vw`;
+                leaf.style.animationDuration = `${10 + Math.random() * 10}s`;
+                leaf.style.animationDelay = `${Math.random() * 8}s`;
+                leaf.style.transform = `scale(${0.6 + Math.random() * 0.6})`;
+                container.appendChild(leaf);
+            }
+        }
+
+        function toggleLeaves() {
+            leavesEnabled = !leavesEnabled;
+            const statusEl = document.getElementById('leaf-status-text');
+            statusEl.textContent = leavesEnabled ? 'Hiệu ứng: Bật' : 'Hiệu ứng: Tắt';
+            createFallingLeaves();
+        }
+
+        // 7. Tiện ích Modal, Copy & Tải file HTML
+        function openContactModal() {
+            document.getElementById('contact-modal').classList.remove('hidden');
+        }
+
+        function openAdminModal() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, 2400);
+        }
+
+        function copyText(text, successMsg) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(successMsg || 'Đã sao chép!');
+        }
+
+        function copyBioUrl() {
+            copyText(window.location.href, 'Đã sao chép đường dẫn trang Bio!');
+        }
+
+        function shareBioPage() {
+            if (navigator.share) {
+                navigator.share({
+                    title: BIO_CONFIG.brandName,
+                    text: 'Tổng hợp deal hời TikTok Shop & Shopee từ TeaZ Review 🍃',
+                    url: window.location.href
+                }).catch(() => {});
+            } else {
+                copyBioUrl();
+            }
+        }
+
+        function applyQuickEdits() {
+            const newBrand = document.getElementById('edit-brand').value.trim();
+            const newShopee = document.getElementById('edit-shopee').value.trim();
+            const newTiktok = document.getElementById('edit-tiktok').value.trim();
+            const newFb = document.getElementById('edit-fb').value.trim();
+            const newEmail = document.getElementById('edit-email').value.trim();
+
+            if (newBrand) {
+                BIO_CONFIG.brandName = newBrand;
+                document.getElementById('display-brand-name').textContent = newBrand;
+            }
+            if (newShopee) {
+                BIO_CONFIG.shopeeCollectionUrl = newShopee;
+                PRODUCTS.forEach(p => p.shopeeUrl = newShopee);
+            }
+            if (newTiktok) {
+                BIO_CONFIG.tiktokProfileUrl = newTiktok;
+                document.getElementById('cta-tiktok-link').href = newTiktok;
+                document.getElementById('social-tiktok').href = newTiktok;
+                PRODUCTS.forEach(p => p.tiktokUrl = newTiktok);
+            }
+            if (newFb) {
+                BIO_CONFIG.facebookPageUrl = newFb;
+                document.getElementById('cta-facebook-link').href = newFb;
+                document.getElementById('social-facebook').href = newFb;
+            }
+            if (newEmail) {
+                BIO_CONFIG.bookingEmail = newEmail;
+                document.getElementById('contact-email-text').textContent = newEmail;
+            }
+
+            renderProducts();
+            closeModal('admin-modal');
+            showToast('Đã cập nhật thông tin trên trang!');
+        }
+
+        function downloadStandaloneHTML() {
+            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Đã tải xuống file index.html sẵn sàng deploy!');
+        }
+    </script>
+</body>
+</html>

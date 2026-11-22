@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://teaz-shop.store/sitemap.xml
