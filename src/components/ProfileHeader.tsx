@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { BadgeCheck, Mail, ShoppingBag } from "lucide-react";
 import { site } from "../data/site";
 import { openShopeeSmartLink } from "../lib/shopee";
@@ -81,6 +82,13 @@ export function ProfileHeader({ onContact }: ProfileHeaderProps) {
           <Mail className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
+
+      <Link
+        to="/profile"
+        className="mt-4 inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-tea-300 hover:text-tea-800"
+      >
+        Portfolio lập trình
+      </Link>
     </header>
   );
 }

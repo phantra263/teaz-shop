@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { site } from "../data/site";
 
 interface SiteFooterProps {
@@ -22,6 +23,10 @@ export function SiteFooter({ onCopyLink }: SiteFooterProps) {
         <a href="#cau-hoi" className="hover:text-tea-700">
           Câu hỏi
         </a>
+        <span aria-hidden="true">•</span>
+        <Link to="/profile" className="hover:text-tea-700">
+          Portfolio
+        </Link>
       </nav>
       <p className="text-[11px] text-slate-400">
         © {new Date().getFullYear()}{" "}

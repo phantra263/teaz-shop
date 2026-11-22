@@ -44,6 +44,20 @@
   }
 }
 
+@keyframes zoom {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(5deg);
+  }
+  85% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0.2;
+    transform: scale(2.2);
+  }
+}
+
 @keyframes shimmer {
   0% {
     left: -100%;
@@ -100,7 +114,39 @@
 @media (prefers-reduced-motion: reduce) {
   .tea-leaf-particle,
   .shimmer-btn::after,
-  .animate-float-slow {
+  .animate-float-slow,
+  .profile-stars {
     animation: none !important;
+  }
+}
+
+.profile-shell {
+  background-color: #1c1c22;
+  background-image: url("/profile/hero-glow.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.profile-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background-image:
+    radial-gradient(2px 2px at 50px 200px, #eee, transparent),
+    radial-gradient(2px 2px at 40px 70px, #fff, transparent),
+    radial-gradient(3px 4px at 120px 40px, #ddd, transparent);
+  background-repeat: repeat;
+  background-size: 250px 250px;
+  opacity: 0.35;
+  animation: zoom 10s infinite;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .profile-shell {
+    background-position: right;
   }
 }
