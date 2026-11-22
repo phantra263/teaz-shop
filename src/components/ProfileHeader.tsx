@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { BadgeCheck, Mail, ShoppingBag } from "lucide-react";
+import { BadgeCheck, Mail } from "lucide-react";
 import { site } from "../data/site";
 import { openShopeeSmartLink } from "../lib/shopee";
-import { FacebookIcon, TeaLeafMark, TikTokIcon } from "./icons";
+import { FacebookIcon, ShopeeIcon, TikTokIcon } from "./icons";
 
 interface ProfileHeaderProps {
   onContact: () => void;
@@ -12,15 +12,11 @@ export function ProfileHeader({ onContact }: ProfileHeaderProps) {
   return (
     <header className="mb-7 text-center lg:mb-5 lg:rounded-[28px] lg:border lg:border-white/80 lg:bg-white/75 lg:p-6 lg:shadow-sm lg:backdrop-blur-md">
       <div className="group relative mb-3.5 inline-block">
-        <div className="mx-auto h-24 w-24 rounded-full bg-gradient-to-tr from-tea-700 via-tea-600 to-emerald-400 p-1 shadow-lg shadow-tea-600/20 transition-transform duration-300 group-hover:scale-105 lg:h-28 lg:w-28">
-          <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-full bg-white">
-            <div className="absolute inset-0 bg-tea-50/60" />
-            <TeaLeafMark className="animate-float-slow relative z-10 -mb-0.5 h-7 w-7 text-tea-600" />
-            <span className="font-display relative z-10 text-xl font-extrabold tracking-tight text-tea-900">
-              TeaZ
-            </span>
-          </div>
-        </div>
+        <img
+          src="/avatar.png"
+          alt="TeaZ Review & Tech"
+          className="mx-auto h-28 w-28 rounded-full object-cover shadow-lg shadow-tea-900/15 transition-transform duration-300 group-hover:scale-105 lg:h-32 lg:w-32"
+        />
         <div
           className="absolute right-0.5 bottom-0.5 rounded-full border-2 border-white bg-tea-600 p-1 text-white shadow-sm"
           title="Kênh Review Chính Thức"
@@ -69,9 +65,9 @@ export function ProfileHeader({ onContact }: ProfileHeaderProps) {
           type="button"
           onClick={() => openShopeeSmartLink(site.shopeeCollectionUrl)}
           aria-label="Bộ sưu tập Shopee"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-800 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-orange-500 hover:text-white"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-orange-300 hover:bg-orange-50"
         >
-          <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+          <ShopeeIcon className="h-4 w-4" />
         </button>
         <button
           type="button"

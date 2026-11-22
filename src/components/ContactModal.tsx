@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { ExternalLink, MessageCircle, Sparkles, X } from "lucide-react";
+import { ExternalLink, Sparkles, X } from "lucide-react";
+import { FacebookIcon } from "./icons";
 import { site } from "../data/site";
 import { copyText } from "../lib/clipboard";
 
@@ -103,7 +104,7 @@ export function ContactModal({ open, onClose, onCopied }: ContactModalProps) {
             className="flex items-center justify-between rounded-2xl border border-blue-100 bg-blue-50/70 p-3 transition hover:bg-blue-50"
           >
             <div className="flex items-center gap-2.5">
-              <MessageCircle className="h-5 w-5 text-blue-600" aria-hidden="true" />
+              <FacebookIcon className="h-5 w-5 text-[#1877F2]" />
               <div>
                 <p className="text-xs font-bold text-slate-900">
                   Nhắn qua Fanpage TeaZ Code

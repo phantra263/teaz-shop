@@ -1,6 +1,7 @@
-import { ArrowUpRight, ChevronRight, Flame } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Flame, MessageCircle } from "lucide-react";
 import { site } from "../data/site";
 import { openShopeeSmartLink } from "../lib/shopee";
+import { FacebookIcon, ShopeeIcon, TikTokIcon } from "./icons";
 
 interface LinkCardsProps {
   onContact: () => void;
@@ -27,10 +28,8 @@ export function LinkCards({ onContact }: LinkCardsProps) {
           Hot deal
         </span>
         <div className="relative z-10 flex items-center gap-3.5">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-sm transition-transform group-hover:scale-105">
-            <span className="text-2xl" aria-hidden="true">
-              🛍️
-            </span>
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white transition-transform group-hover:scale-105">
+            <ShopeeIcon className="h-7 w-7" />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-display truncate text-base font-bold text-white lg:whitespace-normal">
@@ -53,10 +52,8 @@ export function LinkCards({ onContact }: LinkCardsProps) {
         className="group block rounded-2xl border border-tea-100/80 bg-white/95 p-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
       >
         <div className="flex items-center gap-3.5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white transition-transform group-hover:scale-105">
-            <span className="text-xl" aria-hidden="true">
-              🎵
-            </span>
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black text-white transition-transform group-hover:scale-105">
+            <TikTokIcon className="h-6 w-6" />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-display truncate text-[15px] font-bold text-slate-900">
@@ -80,10 +77,8 @@ export function LinkCards({ onContact }: LinkCardsProps) {
         className="group block rounded-2xl border border-tea-100/80 bg-white/95 p-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
       >
         <div className="flex items-center gap-3.5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600 transition-transform group-hover:scale-105">
-            <span className="text-xl" aria-hidden="true">
-              📘
-            </span>
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#1877F2] text-white transition-transform group-hover:scale-105">
+            <FacebookIcon className="h-6 w-6" />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-display truncate text-[15px] font-bold text-slate-900">
@@ -107,9 +102,7 @@ export function LinkCards({ onContact }: LinkCardsProps) {
       >
         <div className="flex items-center gap-3.5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-tea-200/70 bg-tea-50 text-tea-700 transition-transform group-hover:scale-105">
-            <span className="text-xl" aria-hidden="true">
-              💬
-            </span>
+            <MessageCircle className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-display truncate text-[15px] font-bold text-slate-900">

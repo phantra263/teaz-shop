@@ -117,9 +117,9 @@ export function ProfilePage() {
 
           <div className="relative z-10 order-1 mb-8 h-[305px] w-[305px] xl:order-none xl:mb-0 xl:h-[506px] xl:w-[506px]">
             <motion.img
-              src="/profile/avatar.png"
-              alt="Ảnh TeaZ"
-              className="absolute inset-0 m-auto h-[298px] w-[298px] rounded-full object-contain mix-blend-lighten xl:h-[498px] xl:w-[498px]"
+              src="/avatar.png"
+              alt="TeaZ Review & Tech"
+              className="absolute inset-0 m-auto h-[298px] w-[298px] rounded-full object-cover xl:h-[498px] xl:w-[498px]"
               initial={reduceMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.4 }}
