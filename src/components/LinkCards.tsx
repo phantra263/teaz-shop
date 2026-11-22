@@ -8,7 +8,7 @@ interface LinkCardsProps {
 
 export function LinkCards({ onContact }: LinkCardsProps) {
   return (
-    <section aria-labelledby="lien-ket-heading" className="mb-8 space-y-3.5">
+    <section aria-labelledby="lien-ket-heading" className="mb-8 space-y-3.5 lg:mb-0">
       <h2 id="lien-ket-heading" className="sr-only">
         Liên kết chính
       </h2>
@@ -33,7 +33,7 @@ export function LinkCards({ onContact }: LinkCardsProps) {
             </span>
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-display truncate text-base font-bold text-white">
+            <h3 className="font-display truncate text-base font-bold text-white lg:whitespace-normal">
               Bộ Sưu Tập Đồ Hay Trên Shopee
             </h3>
             <p className="mt-0.5 line-clamp-1 text-xs text-tea-100">

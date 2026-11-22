@@ -17,7 +17,7 @@ export function InAppBanner() {
 
   return (
     <div className="sticky top-0 z-50 border-b border-tea-500/30 bg-slate-900/95 px-4 py-3 text-white shadow-lg backdrop-blur-md">
-      <div className="mx-auto flex max-w-[480px] items-start gap-3">
+      <div className="mx-auto flex max-w-[480px] items-start gap-3 lg:max-w-6xl">
         <div className="mt-0.5 shrink-0 rounded-xl bg-tea-500/20 p-2 text-tea-400">
           <ExternalLink className="h-5 w-5" aria-hidden="true" />
         </div>

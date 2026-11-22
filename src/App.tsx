@@ -62,7 +62,7 @@ export default function App() {
       <InAppBanner />
       <main
         id="noi-dung"
-        className="relative z-10 mx-auto max-w-[480px] px-4 pt-6 pb-20"
+        className="relative z-10 mx-auto w-full max-w-[480px] px-4 pt-6 pb-20 lg:max-w-6xl lg:px-8 lg:pt-8 lg:pb-16"
       >
         <Toolbar
           leavesOn={leavesOn}
@@ -71,9 +71,13 @@ export default function App() {
             void handleShare();
           }}
         />
-        <ProfileHeader onContact={openContact} />
-        <LinkCards onContact={openContact} />
-        <ProductList />
+        <div className="lg:grid lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] lg:items-start lg:gap-8">
+          <aside className="lg:sticky lg:top-6">
+            <ProfileHeader onContact={openContact} />
+            <LinkCards onContact={openContact} />
+          </aside>
+          <ProductList />
+        </div>
         <AboutSection />
         <SiteFooter onCopyLink={() => void handleCopyLink()} />
       </main>

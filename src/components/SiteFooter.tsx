@@ -6,10 +6,10 @@ interface SiteFooterProps {
 
 export function SiteFooter({ onCopyLink }: SiteFooterProps) {
   return (
-    <footer className="mt-8 space-y-2 text-center">
+    <footer className="mt-8 space-y-2 text-center lg:mt-12 lg:flex lg:items-center lg:justify-between lg:gap-4 lg:space-y-0 lg:border-t lg:border-tea-100 lg:pt-6 lg:text-left">
       <nav
         aria-label="Trong trang"
-        className="flex items-center justify-center gap-3 text-[11px] text-slate-500"
+        className="flex items-center justify-center gap-3 text-[11px] text-slate-500 lg:justify-start lg:text-xs"
       >
         <a href="#san-pham" className="hover:text-tea-700">
           Sản phẩm

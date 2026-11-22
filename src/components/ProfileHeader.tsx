@@ -9,9 +9,9 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ onContact }: ProfileHeaderProps) {
   return (
-    <header className="mb-7 text-center">
+    <header className="mb-7 text-center lg:mb-5 lg:rounded-[28px] lg:border lg:border-white/80 lg:bg-white/75 lg:p-6 lg:shadow-sm lg:backdrop-blur-md">
       <div className="group relative mb-3.5 inline-block">
-        <div className="mx-auto h-24 w-24 rounded-full bg-gradient-to-tr from-tea-700 via-tea-600 to-emerald-400 p-1 shadow-lg shadow-tea-600/20 transition-transform duration-300 group-hover:scale-105">
+        <div className="mx-auto h-24 w-24 rounded-full bg-gradient-to-tr from-tea-700 via-tea-600 to-emerald-400 p-1 shadow-lg shadow-tea-600/20 transition-transform duration-300 group-hover:scale-105 lg:h-28 lg:w-28">
           <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-full bg-white">
             <div className="absolute inset-0 bg-tea-50/60" />
             <TeaLeafMark className="animate-float-slow relative z-10 -mb-0.5 h-7 w-7 text-tea-600" />
@@ -28,7 +28,7 @@ export function ProfileHeader({ onContact }: ProfileHeaderProps) {
         </div>
       </div>
 
-      <h1 className="font-display text-xl font-extrabold tracking-tight text-slate-900">
+      <h1 className="font-display text-xl font-extrabold tracking-tight text-slate-900 lg:text-2xl">
         {site.brandName}
       </h1>
       <p className="mt-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-tea-700">

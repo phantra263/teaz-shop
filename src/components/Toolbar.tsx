@@ -8,7 +8,7 @@ interface ToolbarProps {
 
 export function Toolbar({ leavesOn, onToggleLeaves, onShare }: ToolbarProps) {
   return (
-    <div className="mb-4 flex items-center justify-between">
+    <div className="mb-4 flex items-center justify-between gap-3 lg:mb-8">
       <button
         type="button"
         onClick={onToggleLeaves}
@@ -19,6 +19,30 @@ export function Toolbar({ leavesOn, onToggleLeaves, onShare }: ToolbarProps) {
         <span aria-hidden="true">🍃</span>
         <span>{leavesOn ? "Hiệu ứng: Bật" : "Hiệu ứng: Tắt"}</span>
       </button>
+
+      <nav
+        aria-label="Trong trang"
+        className="hidden items-center gap-1 rounded-full border border-white/80 bg-white/70 p-1 shadow-sm backdrop-blur-sm lg:flex"
+      >
+        <a
+          href="#san-pham"
+          className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-tea-50 hover:text-tea-800"
+        >
+          Sản phẩm
+        </a>
+        <a
+          href="#ve-teaz"
+          className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-tea-50 hover:text-tea-800"
+        >
+          Về TeaZ
+        </a>
+        <a
+          href="#cau-hoi"
+          className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-tea-50 hover:text-tea-800"
+        >
+          Câu hỏi
+        </a>
+      </nav>
 
       <button
         type="button"
