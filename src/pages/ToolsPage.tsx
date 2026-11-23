@@ -2,26 +2,10 @@ import { useEffect } from "react";
 import { Bell, ChartNoAxesCombined, ScanSearch } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FacebookIcon } from "../components/icons";
-import { shopeePriceTool } from "../data/tools";
+import { shopeePriceFeatures, shopeePriceTool } from "../data/tools";
 import "./shop.css";
 
-const features = [
-  {
-    title: "Lịch sử giá 30–90 ngày",
-    description: "Xem biểu đồ ngay dưới giá trên trang sản phẩm Shopee.vn, kèm giá cao nhất, thấp nhất và trung bình.",
-    Icon: ChartNoAxesCombined,
-  },
-  {
-    title: "Cảnh báo tăng giá trước sale",
-    description: "Đối chiếu mức giá đang hiển thị với lịch sử giá khi tiện ích phát hiện dấu hiệu tăng giá trước khuyến mãi.",
-    Icon: ScanSearch,
-  },
-  {
-    title: "Theo dõi giá mục tiêu",
-    description: "Thêm sản phẩm vào danh sách theo dõi để nhận thông báo khi giá giảm về mức bạn mong muốn.",
-    Icon: Bell,
-  },
-];
+const featureIcons = [ChartNoAxesCombined, ScanSearch, Bell];
 
 export function ToolsPage() {
   useEffect(() => {
@@ -54,13 +38,16 @@ export function ToolsPage() {
           <section className="hub-section" aria-labelledby="tool-features">
             <h2 id="tool-features" className="hub-heading">Tiện ích giúp bạn làm gì?</h2>
             <div className="hub-tool-features">
-              {features.map(({ title, description, Icon }) => (
-                <article className="hub-tool-feature" key={title}>
-                  <Icon size={24} aria-hidden="true" />
-                  <h3>{title}</h3>
-                  <p>{description}</p>
-                </article>
-              ))}
+              {shopeePriceFeatures.map(({ title, description }, index) => {
+                const Icon = featureIcons[index];
+                return (
+                  <article className="hub-tool-feature" key={title}>
+                    <Icon size={24} aria-hidden="true" />
+                    <h3>{title}</h3>
+                    <p>{description}</p>
+                  </article>
+                );
+              })}
             </div>
           </section>
           <section className="hub-section hub-tool-guide" aria-labelledby="tool-guide">

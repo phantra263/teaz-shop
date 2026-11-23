@@ -6,8 +6,8 @@ const stops = [
   { id: "lab", name: "Xưởng Tool", x: -6.3, z: -3.2, height: 3.4, description: "Tìm hiểu tiện ích TeaZ để xem lịch sử giá và đối chiếu các đợt sale trên Shopee.", href: "/tools", action: "Khám phá tiện ích" },
   { id: "studio", name: "Trạm Video", x: 6, z: 2.4, height: 3.8, description: "Mở các kênh TikTok, YouTube và Facebook của TeaZ.", href: "/#kenh-noi-dung", action: "Xem các kênh" },
   { id: "house", name: "Nhà TeaZ", x: 2.8, z: -4.6, height: 3.75, description: "Xem các dự án và portfolio lập trình của Trà Phan.", href: "/profile", action: "Xem portfolio" },
-  { id: "grove", name: "Rừng Gió", x: -13.4, z: -4.1, height: 2.25, description: "Đi dọc bìa rừng để gặp thỏ và nhìn đàn chim bay qua tán cây.", href: null, action: null },
-  { id: "pond", name: "Đầm Sen", x: 12.4, z: -3.65, height: 1.85, description: "Dừng bên bờ ngắm vịt bơi qua lá sen, lau sậy và hoa nở.", href: null, action: null },
+  { id: "grove", name: "Rừng Gió", x: -13.4, z: -4.1, height: 2.25, description: "Đi dọc bìa rừng để gặp thỏ, gọi chim hoặc đưa tay đón bướm.", href: null, action: null },
+  { id: "pond", name: "Đầm Sen", x: 12.4, z: -3.65, height: 1.85, description: "Dừng bên bờ để gọi vịt bơi tới hoặc đón bướm giữa những bụi hoa.", href: null, action: null },
 ] as const;
 
 export const islandStops = stops.map((stop) => ({ ...stop, x: stop.x * islandLayoutScale, z: stop.z * islandLayoutScale }));

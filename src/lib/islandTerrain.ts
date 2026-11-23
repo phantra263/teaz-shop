@@ -6,6 +6,14 @@ export function pondDistance(x: number, z: number) {
   return Math.hypot(x - islandPond.x, z - islandPond.z);
 }
 
+export function pondRadiusAt(angle: number) {
+  return islandPond.radius * (1 + 0.13 * Math.cos(2 * angle - 0.6) + 0.095 * Math.sin(3 * angle + 0.4) + 0.037 * Math.cos(5 * angle - 1.12));
+}
+
+export function pondBankDistance(x: number, z: number) {
+  return pondDistance(x, z) - pondRadiusAt(Math.atan2(z - islandPond.z, x - islandPond.x));
+}
+
 function fade(from: number, to: number, value: number) {
   const t = Math.min(1, Math.max(0, (value - from) / (to - from)));
   return t * t * (3 - 2 * t);
@@ -28,7 +36,7 @@ export function islandElevation(x: number, z: number) {
     const dz = (z - hz) / depth;
     height += rise * Math.exp(-1.75 * (dx * dx + dz * dz));
   }
-  const byPond = fade(islandPond.radius + 0.35, islandPond.radius + 2.65, pondDistance(x, z));
+  const byPond = fade(0.33, 2.65, pondBankDistance(x, z));
   const byPier = fade(1.6, 6.5, Math.hypot(x, Math.max(0, 20.9 - z)));
   let byBuilding = 1;
   for (const [siteX, siteZ] of levelSites) {

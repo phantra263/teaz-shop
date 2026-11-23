@@ -92,6 +92,26 @@
 .island-area svg { color: var(--island-accent); }
 .island-scene-actions { right: var(--stage-gutter); display: flex; gap: .4rem; }
 .island-motion-toggle[aria-pressed="true"] { border-color: #ecd39d; }
+.island-obstacle { position: absolute; z-index: 3; top: var(--stage-gutter); left: 50%; transform: translateX(-50%); margin: 0; padding: .48rem .68rem; width: max-content; max-width: calc(100% - 2 * var(--stage-gutter)); border: 1px solid #e0c58879; border-radius: .45rem; background: #132d2bf0; color: #fff5da; font-size: .8rem; font-weight: 750; pointer-events: none; }
+.island-wildlife { position: absolute; z-index: 3; left: var(--stage-gutter); bottom: calc(var(--stage-gutter) + 3rem); display: grid; justify-items: start; gap: .33rem; max-width: min(17rem, calc(100% - 2 * var(--stage-gutter))); }
+.island-wildlife-button { justify-content: flex-start; min-height: 2.34rem; text-align: left; }
+.island-wildlife-button[aria-disabled="true"] { opacity: .72; cursor: default; }
+.island-wildlife-button kbd { margin-inline-start: .35rem; padding: .1rem .28rem; border: 1px solid #d0c6a765; border-radius: .25rem; color: var(--island-accent); font: 750 .72rem/1.2 system-ui; }
+.island-wildlife-response { margin: 0; padding: .44rem .64rem; border: 1px solid #e0c58879; border-radius: .45rem; background: #132d2bf2; color: #fff5da; font-size: .77rem; }
+.island-place-card { position: absolute; z-index: 4; left: 50%; bottom: calc(var(--stage-gutter) + 3.25rem); transform: translateX(-50%); width: min(27rem, calc(100% - 2 * var(--stage-gutter))); padding: .72rem; border: 1px solid #d5b87580; border-radius: .75rem; background: #122c28f5; box-shadow: 0 13px 42px #0b221d70; }
+.island-place-card-heading { display: flex; align-items: center; gap: .6rem; }
+.island-place-card-icon { display: grid; place-items: center; flex: 0 0 2.3rem; height: 2.3rem; border-radius: .45rem; background: #dfc48525; color: var(--island-accent); }
+.island-place-card-heading h2 { margin: 0; color: var(--island-ink); font-size: .95rem; font-weight: 800; }
+.island-place-card-heading p { margin: .13rem 0 0; color: var(--island-muted); font-size: .75rem; line-height: 1.35; }
+.island-place-card-preview { margin-block-start: .65rem; padding-block-start: .65rem; border-top: 1px solid var(--island-border); font-size: .78rem; line-height: 1.5; color: var(--island-ink); }
+.island-place-card-preview p { margin: 0; }
+.island-place-card-preview ul { display: flex; flex-wrap: wrap; gap: .32rem; padding: 0; margin: .55rem 0 0; list-style: none; }
+.island-place-card-preview li { padding: .2rem .36rem; border: 1px solid var(--island-border); border-radius: .25rem; color: #efd9a9; font-size: .69rem; }
+.island-place-card-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .42rem; margin-top: .62rem; }
+.island-place-card-actions .island-ui-button { min-height: 2.35rem; }
+.island-place-primary { background: var(--island-accent); border-color: var(--island-accent); color: #213228; }
+.island-place-primary svg { color: currentColor; }
+.island-place-primary:hover { background: #f4dda7; }
 .island-help { left: 50%; width: max-content; max-width: calc(100% - 2rem); padding: .58rem .75rem; border-radius: .5rem; color: #fbf6e6; background: #122c29e8; font-size: .75rem; text-align: center; transform: translateX(-50%); pointer-events: none; }
 .island-help kbd { padding: .12rem .25rem; border: 1px solid #d0c6a74c; border-radius: .2rem; color: #ffe6b2; font: 750 .7rem/1.2 system-ui; }
 .island-help-desktop > span { padding-inline: .3rem; color: var(--island-accent); }
@@ -110,12 +130,42 @@
 .island-detail p { margin-top: .25rem; color: var(--island-muted); font-size: .88rem; }
 .island-detail .hub-button-primary { border-color: var(--island-accent); background: var(--island-accent); color: #1b302a; }
 
+.island-place-page { min-height: 100svh; }
+.island-place-page :is(.island-header, .island-place-main) { max-width: 1080px; }
+.island-place-main { padding-block: clamp(.9rem, 3vw, 2.3rem) 2.3rem; }
+.island-place-hero { position: relative; padding: clamp(1.25rem, 5vw, 3.6rem); border: 1px solid var(--island-border); border-radius: 1rem; background: radial-gradient(ellipse at 88% 7%, #4a5842, transparent 62%), #1c352f; }
+.island-place-hero-icon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; margin-bottom: 1rem; border: 1px solid var(--island-border); border-radius: .7rem; color: var(--island-accent); background: #0f2a2466; }
+.island-place-name { margin-bottom: .35rem; color: var(--island-accent); font-size: .86rem; font-weight: 760; }
+.island-place-hero h1 { max-width: 24ch; font: 800 clamp(1.7rem, 5vw, 3.4rem)/1.1 var(--font-display); color: var(--island-ink); letter-spacing: -.035em; outline: none; }
+.island-place-intro { max-width: 67ch; margin: .85rem 0 0; color: #dbe7da; line-height: 1.65; }
+.island-place-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.05rem 0 0; }
+.island-place-links > :first-child { background: var(--island-accent); color: #213228; }
+.island-place-links > :first-child svg { color: currentColor; }
+.island-place-links > :first-child:hover { background: #f4dda7; }
+.island-place-entries { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .7rem; margin-top: .75rem; }
+.island-place-entry { display: flex; flex-direction: column; align-items: start; padding: 1.15rem; border: 1px solid var(--island-border); border-radius: .75rem; background: #192f2c; }
+.island-place-entry h2 { color: var(--island-accent); font: 800 1.05rem/1.35 var(--font-display); }
+.island-place-entry p { flex: 1; margin: .45rem 0 0; color: var(--island-muted); font-size: .87rem; line-height: 1.56; }
+.island-place-entry .island-ui-button { margin-top: .82rem; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .island-place-main { animation: island-place-enter .24s ease-out both; }
+}
+
+@keyframes island-place-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 880px) {
   .island-help { bottom: calc(var(--stage-gutter) + 3.25rem); }
+  .island-wildlife { bottom: calc(var(--stage-gutter) + 5.65rem); }
+  .island-place-card { bottom: calc(var(--stage-gutter) + 5.65rem); }
 }
 
 @media (max-width: 670px) {
   .island-stage { height: clamp(410px, 70svh, 640px); }
+  .island-obstacle { top: calc(var(--stage-gutter) + 7rem); }
   .island-detail { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
   .island-detail .hub-button { grid-column: 1 / -1; justify-self: start; }
   .island-pin { padding: .31rem .43rem; }
@@ -132,4 +182,6 @@
   .island-help-desktop { display: none; }
   .island-help-touch { display: inline; }
   .island-destination { min-height: 2.75rem; }
+  .island-wildlife-button { min-height: 2.75rem; }
+  .island-wildlife-button kbd { display: none; }
 }

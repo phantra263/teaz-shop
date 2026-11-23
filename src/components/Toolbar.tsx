@@ -11,9 +11,9 @@ interface ToolbarProps {
 export function Toolbar({ onShare, motionEnabled, onToggleMotion }: ToolbarProps) {
   return (
     <header className="hub-toolbar">
-      <a href="#dau-trang" className="hub-brand" aria-label="TeaZ Review, đầu trang">
+      <a href="#dau-trang" className="hub-brand" aria-label="TeaZ, đầu trang">
         <img src="/avatar.png" alt="" width="42" height="42" />
-        <span>TeaZ <strong>Review</strong></span>
+        <span>TeaZ</span>
       </a>
       <nav aria-label="Điều hướng chính" className="hub-nav">
         <a href="#kenh-noi-dung">Các kênh</a>

@@ -1,19 +1,21 @@
 import {
   AnimationClip, AnimationMixer, BoxGeometry, CapsuleGeometry, CatmullRomCurve3, Color, ConeGeometry, CylinderGeometry, DirectionalLight,
-  Fog, Group, HemisphereLight, InstancedMesh, Mesh, MeshStandardMaterial, Object3D, PCFShadowMap, PlaneGeometry, ShaderMaterial,
+  Fog, Group, HemisphereLight, InstancedMesh, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PCFShadowMap, PlaneGeometry, ShaderMaterial,
   NumberKeyframeTrack, OrthographicCamera, PerspectiveCamera, Plane, Raycaster, Scene, SphereGeometry, Spherical,
   Vector2, Vector3, WebGLRenderer, type BufferGeometry,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { islandStops, type IslandStopId } from "../data/island";
+import type { IslandAnimalAction, IslandWildlifePrompt } from "../data/islandInteractions";
 import { createIslandBark, createIslandBarkMaterial } from "./islandBark";
 import { createIslandConifers } from "./islandConifers";
 import { createMeadowTexture, createWoodlandFerns, createWoodlandFlowers, type FlowerPatch } from "./islandForestFloor";
 import { createIslandGrass } from "./islandGrass";
 import { createIslandLeaves, type FoliageCluster } from "./islandLeaves";
+import { createIslandNavigation, type IslandObstacle } from "./islandNavigation";
 import { createIslandRelief, createIslandTrail } from "./islandRelief";
 import { createIslandStone, createIslandStoneMaterial } from "./islandStone";
-import { islandElevation, islandGround, islandLayoutScale, islandPond, pondDistance } from "./islandTerrain";
+import { islandElevation, islandGround, islandLayoutScale, islandPond, pondRadiusAt } from "./islandTerrain";
 import { createIslandSky } from "./islandSky";
 import { createIslandWater } from "./islandWater";
 import { createIslandWildlife } from "./islandWildlife";
@@ -30,9 +32,15 @@ export function mountIslandScene(
   map: HTMLCanvasElement | null,
   mapPlayer: HTMLSpanElement | null,
   markers: Readonly<Partial<Record<IslandStopId, HTMLButtonElement>>>,
-  onArrive: (id: IslandStopId) => void,
-  onCancelWalk: () => void,
-  initialMotion: boolean,
+  { onArrive, onCancelWalk, onWildlifeChange, onObstacle, onNearbyStop, initialMotion, initialStop }: {
+    onArrive: (id: IslandStopId) => void;
+    onCancelWalk: () => void;
+    onWildlifeChange: (prompt: IslandWildlifePrompt) => void;
+    onObstacle: (obstacle: IslandObstacle | null) => void;
+    onNearbyStop: (id: IslandStopId | null) => void;
+    initialMotion: boolean;
+    initialStop: IslandStopId;
+  },
 ) {
   const gl = canvas.getContext("webgl2", { antialias: true, alpha: false, powerPreference: "low-power" });
   if (!gl) return;
@@ -109,6 +117,7 @@ export function mountIslandScene(
   sky.cliffs.visible = false;
   scene.add(sky.dome, sky.cliffs);
   const wildlife = createIslandWildlife(scene);
+  const navigation = createIslandNavigation();
   const bank = solid(round, "#8c7862", scene, 0, -0.7, 0);
   bank.scale.set(islandGround.x + 0.4, 1.38, islandGround.z + 0.5);
   const sand = solid(round, "#eed59b", scene, 0, -0.14, 0);
@@ -167,7 +176,15 @@ export function mountIslandScene(
     }
     mapContext.fillStyle = "#4c8a88";
     mapContext.beginPath();
-    mapContext.ellipse(mapX(islandPond.x), mapY(islandPond.z), 4.8, 6.1, 0, 0, Math.PI * 2);
+    for (let index = 0; index < 48; index++) {
+      const angle = index * Math.PI * 2 / 48;
+      const radius = pondRadiusAt(angle);
+      const x = mapX(islandPond.x + Math.cos(angle) * radius);
+      const z = mapY(islandPond.z + Math.sin(angle) * radius);
+      if (index) mapContext.lineTo(x, z);
+      else mapContext.moveTo(x, z);
+    }
+    mapContext.closePath();
     mapContext.fill();
     for (const stop of islandStops) {
       mapContext.fillStyle = "#f4e5bd";
@@ -183,6 +200,7 @@ export function mountIslandScene(
   const canopies: { branch: Group; x: number; z: number }[] = [];
 
   function tree(x: number, z: number, size: number, color: string, index: number) {
+    navigation.addSolid("tree", x, z, 0.31 * size, 0.31 * size);
     const plant = new Group();
     plant.position.set(x, 0.08 + islandElevation(x, z), z);
     plant.scale.setScalar(size);
@@ -261,6 +279,7 @@ export function mountIslandScene(
     const pine = new Group();
     pine.position.set(x, 0.08 + islandElevation(x, z), z);
     pine.scale.set(0.86 + (index % 3) * 0.12, 1.02 + (index % 4) * 0.16, 0.86 + (index % 3) * 0.12);
+    navigation.addSolid("tree", x, z, 0.22 * pine.scale.x, 0.22 * pine.scale.z);
     pine.rotation.y = index * 1.24;
     scene.add(pine);
     const branch = new Group();
@@ -363,6 +382,7 @@ export function mountIslandScene(
     stone.position.set(x, 0.085 + islandElevation(x, z), z);
     stone.scale.set(width, height, depth);
     stone.rotation.y = index * 2.39996;
+    if (height > 0.27) navigation.addSolid("rock", x, z, width * 1.14, depth * 1.14, stone.rotation.y);
     stone.castShadow = true;
     stone.receiveShadow = true;
     scene.add(stone);
@@ -403,6 +423,7 @@ export function mountIslandScene(
   function cabin(localX: number, localZ: number, siding: string, roof: string) {
     const x = localX * islandLayoutScale;
     const z = localZ * islandLayoutScale;
+    navigation.addSolid("building", x, z, 1.34, 1.02);
     grassClearings.push([x, z, 1.65, 1.33]);
     const group = new Group();
     group.position.set(x, 0.09 + islandElevation(x, z), z);
@@ -458,6 +479,7 @@ export function mountIslandScene(
   for (const [index, localX] of [-6.75, -4.24].entries()) {
     const x = localX * islandLayoutScale;
     const z = 1.32 * islandLayoutScale;
+    navigation.addSolid("building", x, z + 0.07, 0.94, 0.73);
     grassClearings.push([x, z, 1.03, 0.92]);
     const stall = new Group();
     stall.position.set(x, 0.09 + islandElevation(x, z), z);
@@ -470,7 +492,7 @@ export function mountIslandScene(
   }
 
   const player = new Group();
-  const spawn = islandStops[0];
+  const spawn = islandStops.find(({ id }) => id === initialStop) ?? islandStops[0];
   player.position.set(spawn.x, 0.16 + islandElevation(spawn.x, spawn.z), spawn.z);
   player.rotation.y = Math.PI;
   player.scale.setScalar(1.12);
@@ -548,6 +570,12 @@ export function mountIslandScene(
   });
   const contactShadow = new Mesh(contactGeometry, contactMaterial);
   scene.add(contactShadow);
+  const dustMaterial = new MeshBasicMaterial({ color: "#cbbb94", transparent: true, opacity: 0, depthWrite: false });
+  const dust = new Group();
+  const particles = Array.from({ length: 6 }, () => new Mesh(foliage, dustMaterial));
+  dust.add(...particles);
+  dust.visible = false;
+  scene.add(dust);
 
   const walkDuration = 0.64;
   const steps = [0, 0.16, 0.32, 0.48, walkDuration];
@@ -564,6 +592,25 @@ export function mountIslandScene(
   const mixer = new AnimationMixer(player);
   const walkAction = mixer.clipAction(walk);
   const idleAction = mixer.clipAction(idle);
+  const gestures = {
+    rabbit: mixer.clipAction(new AnimationClip("Kneel", 1, [
+      new NumberKeyframeTrack("traveler.scale[y]", [0, 1], [0.72, 0.72]),
+      new NumberKeyframeTrack("traveler.rotation[x]", [0, 1], [0.17, 0.17]),
+      new NumberKeyframeTrack("rightArm.rotation[x]", [0, 1], [-0.96, -0.96]),
+    ])),
+    duck: mixer.clipAction(new AnimationClip("Wave", 1.24, [
+      new NumberKeyframeTrack("rightArm.rotation[x]", [0, 1.24], [-1.75, -1.75]),
+      new NumberKeyframeTrack("rightArm.rotation[z]", [0, 0.31, 0.62, 0.93, 1.24], [0.31, 0.67, 0.31, 0.67, 0.31]),
+    ])),
+    bird: mixer.clipAction(new AnimationClip("Call bird", 1, [
+      new NumberKeyframeTrack("rightArm.rotation[x]", [0, 1], [-2.28, -2.28]),
+      new NumberKeyframeTrack("rightArm.rotation[z]", [0, 1], [-0.55, -0.55]),
+      new NumberKeyframeTrack("traveler.rotation[x]", [0, 1], [-0.07, -0.07]),
+    ])),
+    butterfly: mixer.clipAction(new AnimationClip("Offer hand", 1, [
+      new NumberKeyframeTrack("rightArm.rotation[x]", [0, 1], [-1.5, -1.5]),
+    ])),
+  };
   let activeAction = idleAction.play();
 
   const cursor = new Vector2();
@@ -586,49 +633,67 @@ export function mountIslandScene(
   const overviewTarget = new Vector3(0, 0, -0.5);
   let hasGoal = false;
   let targetStop: IslandStopId | undefined;
-  let arrived: IslandStopId | undefined = "pier";
+  let arrived: IslandStopId | undefined = spawn.id;
+  let nearbyStop: IslandStopId | null = null;
   let pointerStart: { id: number; x: number; y: number } | undefined;
   let frameBefore = 0;
   let weatherTime = 0;
   let width = 1;
   let height = 1;
   let animateWeather = initialMotion;
+  let viewVisible = false;
+  let promptKey = "";
+  let gestureHeading: number | undefined;
+  let obstacle: IslandObstacle | null = null;
+  let feedbackTime = 0;
+  let dustTime = 0;
+  let stalledTime = 0;
 
-  function keepOnLand(point: Vector3) {
-    const fromPond = pondDistance(point.x, point.z);
-    if (fromPond < islandPond.radius + 0.1) {
-      const bearing = fromPond > 0.001 ? Math.atan2(point.z - islandPond.z, point.x - islandPond.x) : Math.PI;
-      point.x = islandPond.x + Math.cos(bearing) * (islandPond.radius + 0.1);
-      point.z = islandPond.z + Math.sin(bearing) * (islandPond.radius + 0.1);
-    }
-    const edgeFactor = Math.max(1, Math.hypot(point.x / (islandGround.x - 0.4), point.z / (islandGround.z - 0.35)));
-    point.x /= edgeFactor;
-    point.z /= edgeFactor;
+  function bump(kind: IslandObstacle) {
+    if (obstacle === kind) return;
+    obstacle = kind;
+    feedbackTime = 0.9;
+    onObstacle(kind);
+    if (!animateWeather || kind === "water") return;
+    const x = player.position.x + Math.sin(player.rotation.y) * 0.21;
+    const z = player.position.z + Math.cos(player.rotation.y) * 0.21;
+    dust.position.set(x, 0.155 + islandElevation(x, z), z);
+    dustTime = 0.44;
+  }
+
+  function publishWildlife(prompt: IslandWildlifePrompt) {
+    const nextKey = `${prompt.active ?? ""}:${prompt.nearby.join(",")}`;
+    if (nextKey === promptKey) return;
+    promptKey = nextKey;
+    onWildlifeChange(prompt);
+  }
+
+  function interact(action?: IslandAnimalAction) {
+    if (!viewVisible || !closeView || hasGoal || keys.size) return false;
+    const nearby = wildlife.nearbyActions(player.position);
+    const selected = action ?? nearby[0];
+    if (!selected) return false;
+    const heading = wildlife.interact(player.position, selected);
+    if (heading === undefined) return false;
+    gestureHeading = heading;
+    publishWildlife({ nearby, active: selected });
+    return true;
   }
 
   function setDestination(x: number, z: number, stop?: IslandStopId) {
-    target.set(x, player.position.y, z);
-    keepOnLand(target);
+    const edge = Math.max(1, Math.hypot(x / (islandGround.x - 0.4), z / (islandGround.z - 0.4)));
+    const route = navigation.route(player.position, { x: x / edge, z: z / edge });
+    const destination = route?.pop();
     waypoints.length = 0;
-    const { x: pondX, z: pondZ, radius } = islandPond;
-    const dx = target.x - player.position.x;
-    const dz = target.z - player.position.z;
-    const distanceSquared = dx * dx + dz * dz;
-    if (distanceSquared > 0.01) {
-      const progress = ((pondX - player.position.x) * dx + (pondZ - player.position.z) * dz) / distanceSquared;
-      const nearest = Math.max(0, Math.min(1, progress));
-      if (pondDistance(player.position.x + nearest * dx, player.position.z + nearest * dz) < radius + 0.1) {
-        const start = Math.atan2(player.position.z - pondZ, player.position.x - pondX);
-        const end = Math.atan2(target.z - pondZ, target.x - pondX);
-        const turn = Math.atan2(Math.sin(end - start), Math.cos(end - start));
-        const segments = Math.max(1, Math.ceil(Math.abs(turn) / 0.32));
-        for (let index = 0; index <= segments; index++) {
-          const angle = start + turn * index / segments;
-          const margin = radius + 0.32;
-          waypoints.push(new Vector3(pondX + Math.cos(angle) * margin, player.position.y, pondZ + Math.sin(angle) * margin));
-        }
-      }
+    stalledTime = 0;
+    if (!destination || !route) {
+      hasGoal = false;
+      targetStop = undefined;
+      onCancelWalk();
+      return;
     }
+    target.set(destination.x, 0, destination.z);
+    waypoints.push(...route.map((point) => new Vector3(point.x, 0, point.z)));
     if (!stop && targetStop) onCancelWalk();
     targetStop = stop;
     hasGoal = true;
@@ -651,7 +716,14 @@ export function mountIslandScene(
   function clearKeys() { keys.clear(); }
   function keyDown(event: KeyboardEvent) {
     const key = event.key.toLowerCase();
-    if (event.altKey || event.ctrlKey || event.metaKey || !controlsByKey.has(key) || (event.target instanceof Element && event.target.closest("a,button,input,textarea,select,[contenteditable]"))) return;
+    if (!viewVisible || event.altKey || event.ctrlKey || event.metaKey) return;
+    const element = event.target instanceof Element ? event.target : null;
+    if (element?.closest("input,textarea,select,[contenteditable]")) return;
+    if (key === "e" && !event.repeat && interact()) {
+      event.preventDefault();
+      return;
+    }
+    if (!controlsByKey.has(key)) return;
     event.preventDefault();
     keys.add(key);
   }
@@ -716,20 +788,57 @@ export function mountIslandScene(
       } else movement.clampLength(0, delta * 5.7);
     }
 
-    const isWalking = movement.lengthSq() > 0.00001;
-    if (isWalking) {
-      player.position.add(movement);
-      keepOnLand(player.position);
+    const attempted = movement.lengthSq() > 0.00001;
+    let isWalking = false;
+    let hit: IslandObstacle | undefined;
+    if (attempted) {
+      const px = player.position.x;
+      const pz = player.position.z;
+      hit = navigation.move(player.position, movement.x, movement.z);
+      const dx = player.position.x - px;
+      const dz = player.position.z - pz;
+      isWalking = dx * dx + dz * dz > 0.00001;
       player.position.y = 0.16 + islandElevation(player.position.x, player.position.z);
-      const turn = Math.atan2(movement.x, movement.z) - player.rotation.y;
+      const turn = (isWalking ? Math.atan2(dx, dz) : Math.atan2(movement.x, movement.z)) - player.rotation.y;
       player.rotation.y += Math.atan2(Math.sin(turn), Math.cos(turn)) * (1 - Math.exp(-17 * delta));
     }
-    const nextAction = isWalking ? walkAction : idleAction;
+    if (hit) {
+      bump(hit);
+      feedbackTime = 0.9;
+    } else if (obstacle && (feedbackTime -= delta) <= 0) {
+      obstacle = null;
+      onObstacle(null);
+    }
+    stalledTime = hasGoal && attempted && !isWalking ? stalledTime + delta : 0;
+    if (stalledTime > 0.4) {
+      hasGoal = false;
+      targetStop = undefined;
+      waypoints.length = 0;
+      onCancelWalk();
+    }
+    const encounter = wildlife.activeAction;
+    if (!isWalking && encounter && gestureHeading !== undefined) {
+      const turn = gestureHeading - player.rotation.y;
+      player.rotation.y += Math.atan2(Math.sin(turn), Math.cos(turn)) * (1 - Math.exp(-15 * delta));
+    }
+    const nextAction = isWalking ? walkAction : encounter ? gestures[encounter] : idleAction;
     if (nextAction !== activeAction) {
       nextAction.reset().crossFadeFrom(activeAction, 0.14, false).play();
       activeAction = nextAction;
     }
     mixer.update(delta);
+    if (dustTime > 0) {
+      dustTime = Math.max(0, dustTime - delta);
+      const progress = 1 - dustTime / 0.44;
+      dust.visible = dustTime > 0;
+      dustMaterial.opacity = 0.33 * (1 - progress);
+      particles.forEach((particle, index) => {
+        const angle = index * 2.39996;
+        const spread = 0.025 + progress * (0.14 + index * 0.027);
+        particle.position.set(Math.cos(angle) * spread, progress * (0.21 + index * 0.023), Math.sin(angle) * spread);
+        particle.scale.setScalar(0.037 + progress * 0.028);
+      });
+    }
 
     const shadowX = player.position.x + 0.14;
     const shadowZ = player.position.z - 0.12;
@@ -754,12 +863,16 @@ export function mountIslandScene(
     const near = islandStops.find(({ x, z }) => Math.hypot(x - player.position.x, z - player.position.z) < 0.75);
     if (near && arrived !== near.id && !hasGoal) onArrive(near.id);
     arrived = near && !hasGoal ? near.id : undefined;
+    const front = hasGoal ? null : islandStops.find(({ id, x, z }) => Math.hypot(x - player.position.x, z - player.position.z) < (id === nearbyStop ? 2.75 : 1.85))?.id ?? null;
+    if (front !== nearbyStop) {
+      nearbyStop = front;
+      onNearbyStop(front);
+    }
 
     if (animateWeather) {
       weatherTime += Math.min(frameTime, 0.25);
       water.update(weatherTime);
       sky.update(weatherTime);
-      wildlife.update(weatherTime);
       boat.position.y = -1.25 + Math.sin(weatherTime * 1.8) * 0.08;
       boat.rotation.z = Math.sin(weatherTime * 1.5) * 0.075;
       boat.rotation.x = Math.cos(weatherTime * 1.1) * 0.036;
@@ -771,7 +884,13 @@ export function mountIslandScene(
         branch.rotation.x += (0.024 + 0.065 * gust - flutter - branch.rotation.x) * sway;
       }
     }
-    grass.update(weatherTime, player.position, animateWeather);
+    wildlife.update(weatherTime, Math.min(frameTime, 0.25), player.position);
+    if (!wildlife.activeAction) gestureHeading = undefined;
+    publishWildlife({
+      active: closeView ? wildlife.activeAction : null,
+      nearby: closeView && !isWalking && !hasGoal ? wildlife.nearbyActions(player.position) : [],
+    });
+    grass.update(weatherTime, player.position, animateWeather, camera.position);
     leaves.update(weatherTime, animateWeather);
     if (closeView) sky.dome.position.copy(camera.position);
     renderer.render(scene, camera);
@@ -795,6 +914,7 @@ export function mountIslandScene(
   }
 
   const viewObserver = new IntersectionObserver(([entry]) => {
+    viewVisible = entry.isIntersecting;
     frameBefore = 0;
     renderer.setAnimationLoop(entry.isIntersecting ? draw : null);
     if (!entry.isIntersecting) clearKeys();
@@ -807,6 +927,7 @@ export function mountIslandScene(
   window.addEventListener("blur", clearKeys);
 
   return {
+    interact,
     setMotion(enabled: boolean) { animateWeather = enabled; },
     setCloseView(enabled: boolean) {
       if (enabled === closeView) return;
@@ -864,6 +985,7 @@ export function mountIslandScene(
       stoneMaterial.dispose();
       contactGeometry.dispose();
       contactMaterial.dispose();
+      dustMaterial.dispose();
       sun.shadow.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
