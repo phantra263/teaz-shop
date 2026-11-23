@@ -19,6 +19,7 @@ export function Toolbar({ onShare, motionEnabled, onToggleMotion }: ToolbarProps
         <a href="#kenh-noi-dung">Các kênh</a>
         <a href="#san-pham">Sản phẩm</a>
         <a href="#cong-cu">Công cụ</a>
+        <Link to="/dao-tra">Đảo Trà</Link>
         <Link to={servicesPage.path}>Dịch vụ</Link>
         <a href="#hop-tac">Hợp tác</a>
         <Link to="/profile">Portfolio</Link>
