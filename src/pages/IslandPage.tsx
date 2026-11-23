@@ -1,21 +1,37 @@
 import { useEffect, useRef, useState } from "react";
-import { Compass, Flag, House, MapPin, Radio, ShoppingBag, Wrench } from "lucide-react";
+import { ArrowLeft, Compass, Flag, House, LocateFixed, Map, MapPin, Radio, ShoppingBag, Trees, Waves, Wind, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 import { islandStops, type IslandStopId } from "../data/island";
 import type { mountIslandScene } from "../lib/islandScene";
 import "./shop.css";
 import "./island.css";
 
-const icons = { pier: Flag, market: ShoppingBag, lab: Wrench, studio: Radio, house: House };
+const icons = { pier: Flag, market: ShoppingBag, lab: Wrench, studio: Radio, house: House, grove: Trees, pond: Waves };
+const motionPreference = "teaz-island-motion";
+
+function readMotionPreference() {
+  try {
+    const saved = localStorage.getItem(motionPreference);
+    if (saved === "on" || saved === "off") return saved === "on";
+  } catch {
+    // Browsers can block storage without blocking the 3D scene.
+  }
+  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
 export default function IslandPage() {
   const viewport = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const mapCanvas = useRef<HTMLCanvasElement>(null);
+  const mapPlayer = useRef<HTMLSpanElement>(null);
   const markerElements = useRef<Partial<Record<IslandStopId, HTMLButtonElement>>>({});
   const scene = useRef<ReturnType<typeof mountIslandScene>>(undefined);
   const [sceneStatus, setSceneStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [selected, setSelected] = useState<IslandStopId>("pier");
   const [walking, setWalking] = useState(false);
+  const [closeView, setCloseView] = useState(true);
+  const [motion, setMotion] = useState(readMotionPreference);
+  const motionRef = useRef(motion);
   const stop = islandStops.find(({ id }) => id === selected) ?? islandStops[0];
   const StopIcon = icons[stop.id];
 
@@ -30,10 +46,11 @@ export default function IslandPage() {
 
     void import("../lib/islandScene").then(({ mountIslandScene }) => {
       if (disposed) return;
-      scene.current = mountIslandScene(host, surface, markerElements.current, (id) => {
+      scene.current = mountIslandScene(host, surface, mapCanvas.current, mapPlayer.current, markerElements.current, (id) => {
         setSelected(id);
         setWalking(false);
-      }, () => setWalking(false));
+      }, () => setWalking(false), motionRef.current);
+      scene.current?.setCloseView(true);
       setSceneStatus(scene.current ? "ready" : "fallback");
     }).catch(() => {
       if (!disposed) setSceneStatus("fallback");
@@ -55,28 +72,57 @@ export default function IslandPage() {
     }
   }
 
+  function toggleCloseView() {
+    scene.current?.setCloseView(!closeView);
+    setCloseView(!closeView);
+    if (document.activeElement instanceof HTMLElement && document.activeElement.matches(":focus:not(:focus-visible)")) {
+      document.activeElement.blur();
+    }
+  }
+
+  function toggleMotion() {
+    const enabled = !motion;
+    motionRef.current = enabled;
+    setMotion(enabled);
+    scene.current?.setMotion(enabled);
+    try {
+      localStorage.setItem(motionPreference, enabled ? "on" : "off");
+    } catch {
+      // The current scene still uses the chosen setting.
+    }
+  }
+
   return (
     <div className="hub island-shell">
       <header className="island-header">
-        <Link className="hub-brand" to="/">
-          <img src="/avatar.png" width="42" height="42" alt="" />
-          <span>TeaZ <strong>Review</strong></span>
+        <Link className="island-brand" to="/">
+          <ArrowLeft size={17} aria-hidden="true" />
+          <img src="/avatar.png" width="32" height="32" alt="" />
+          <span>TeaZ Review</span>
         </Link>
-        <a href="#dia-diem" className="hub-button hub-button-secondary"><Compass size={17} aria-hidden="true" /> Địa điểm</a>
+        <a href="#dia-diem" className="island-ui-button"><MapPin size={17} aria-hidden="true" /> Địa điểm</a>
       </header>
       <main>
         <div className="island-stage" ref={viewport} data-scene-status={sceneStatus}>
           <canvas ref={canvas} className="island-canvas" aria-hidden="true" />
           <div className="island-intro">
             <h1>Đảo Trà</h1>
-            <p>Khám phá thế giới TeaZ</p>
+            <p><Compass size={15} aria-hidden="true" /> {closeView ? "Khám phá đảo" : "Toàn cảnh đảo"}</p>
           </div>
+          <aside className="island-minimap" hidden={sceneStatus !== "ready"} aria-label="Bản đồ vị trí trên đảo">
+            <div className="island-minimap-art" aria-hidden="true">
+              <canvas ref={mapCanvas} width="288" height="208" />
+              <span className="island-minimap-north">B</span>
+              <span className="island-minimap-player" ref={mapPlayer} />
+            </div>
+            <span className="island-minimap-label">Bản đồ đảo</span>
+          </aside>
           {sceneStatus !== "ready" && (
             <p className="island-stage-status" role="status">
               {sceneStatus === "loading" ? "Đang tải cảnh 3D…" : "Cảnh 3D không khả dụng. Chọn một địa điểm bên dưới để khám phá TeaZ."}
             </p>
           )}
-          <div className="island-markers" hidden={sceneStatus !== "ready"}>
+          <div className="island-markers" hidden={sceneStatus !== "ready" || closeView}>
             {islandStops.map(({ id, name }) => {
               const Icon = icons[id];
               return (
@@ -92,13 +138,26 @@ export default function IslandPage() {
             })}
           </div>
           {sceneStatus === "ready" && (
-            <div className="island-help">
-              <span className="island-help-desktop">WASD hoặc phím mũi tên để đi · Kéo để xoay</span>
-              <span className="island-help-touch">Chạm đất để đi · Kéo để xoay</span>
-            </div>
+            <>
+              <div className="island-area" aria-hidden="true"><StopIcon size={17} /> <span>{stop.name}</span></div>
+              <div className="island-scene-actions">
+                <button type="button" className="island-ui-button island-motion-toggle" aria-label="Hiệu ứng chuyển động" aria-pressed={motion} onClick={toggleMotion}>
+                  <Wind size={17} aria-hidden="true" /> <span aria-hidden="true">Hiệu ứng {motion ? "bật" : "tắt"}</span>
+                </button>
+                <button type="button" className="island-ui-button" onClick={toggleCloseView}>
+                  {closeView ? <Map size={18} aria-hidden="true" /> : <LocateFixed size={18} aria-hidden="true" />}
+                  {closeView ? "Toàn cảnh" : "Theo chân"}
+                </button>
+              </div>
+              <div className="island-help">
+                <span className="island-help-desktop"><kbd>WASD</kbd> hoặc <kbd>↑ ↓ ← →</kbd> để đi <span>·</span> Kéo để xoay</span>
+                <span className="island-help-touch">Chạm đất để đi · Kéo để xoay</span>
+              </div>
+            </>
           )}
         </div>
         <section className="island-dock" id="dia-diem" aria-label="Địa điểm trên đảo">
+          <h2 className="island-dock-title"><Compass size={18} aria-hidden="true" /> Điểm đến</h2>
           <nav className="island-destinations" aria-label="Chọn địa điểm">
             {islandStops.map(({ id, name }) => {
               const Icon = icons[id];

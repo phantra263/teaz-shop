@@ -1,65 +1,131 @@
 .island-shell {
-  padding: 0 clamp(.85rem, 3vw, 2.8rem) 2rem;
-  background: #f5f7ed;
+  --island-ink: #f8f3e3;
+  --island-muted: #bacac0;
+  --island-accent: #e9ce94;
+  --island-border: #d3c39640;
+  padding: 0 clamp(.7rem, 2vw, 2rem) 2.2rem;
+  background: radial-gradient(ellipse at top, #21413d, #102623 65%, #0c1e1d);
+  color: var(--island-ink);
+  color-scheme: dark;
 }
 
-.island-shell > main, .island-header { max-width: 1400px; margin-inline: auto; }
-.island-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding-block: .75rem; }
+.island-shell > main, .island-header { max-width: 1540px; margin-inline: auto; }
+.island-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding-block: .65rem; }
+.island-brand { display: inline-flex; align-items: center; gap: .55rem; color: var(--island-ink); font-weight: 750; }
+.island-brand img { border: 1px solid var(--island-border); border-radius: 50%; }
+.island-brand > svg { color: var(--island-accent); }
+.island-ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 2.65rem;
+  padding: .5rem .85rem;
+  border: 1px solid #d3bc805c;
+  border-radius: .55rem;
+  background: #142d29ef;
+  color: var(--island-ink);
+  font: 720 .83rem/1.2 var(--font-body, system-ui);
+  cursor: pointer;
+}
+.island-ui-button svg { color: var(--island-accent); }
+.island-ui-button:hover { border-color: var(--island-accent); background: #2a4438; }
+.island-shell :is(a, button):focus-visible { outline: 2px solid var(--island-accent); outline-offset: 3px; }
+
 .island-stage {
+  --stage-gutter: clamp(.8rem, 2.5vw, 1.65rem);
   position: relative;
   isolation: isolate;
-  height: clamp(440px, 69svh, 730px);
+  height: clamp(435px, 75svh, 860px);
   overflow: hidden;
-  border-radius: clamp(1.15rem, 3vw, 1.8rem);
-  background: radial-gradient(ellipse at center, #b6e1c9 5%, #71bdb4 78%);
+  border: 1px solid #becea055;
+  border-radius: 1rem;
+  background: radial-gradient(ellipse at center, #b0d3bd 7%, #497a7c 80%);
 }
-.island-canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.island-stage::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, #12303656, transparent 24%, transparent 76%, #10292472);
+  pointer-events: none;
+  content: "";
+}
+.island-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.island-canvas:active { cursor: grabbing; }
 .island-stage:not([data-scene-status="ready"]) .island-canvas { opacity: 0; }
-.island-intro { position: absolute; top: clamp(.85rem, 3vw, 1.75rem); left: clamp(.85rem, 3vw, 1.75rem); pointer-events: none; }
-.island-intro h1 { color: #143d32; font: 800 clamp(2.3rem, 6vw, 4.25rem)/1 var(--font-display); letter-spacing: -.06em; }
-.island-intro p { margin-top: .4rem; color: #224c40; font-size: .9rem; font-weight: 700; }
-.island-stage-status { position: absolute; inset: 45% 10% auto; text-align: center; color: #163f33; font-weight: 700; }
-.island-markers { position: absolute; inset: 0; pointer-events: none; }
+.island-intro { position: absolute; z-index: 2; top: var(--stage-gutter); left: var(--stage-gutter); pointer-events: none; }
+.island-intro h1 { color: #fff7dc; font: 700 clamp(2.5rem, 6.8vw, 5rem)/.95 Georgia, serif; letter-spacing: -.055em; text-shadow: 0 2px 22px #0b292bba, 0 2px 3px #18362b9c; }
+.island-intro p { display: flex; align-items: center; gap: .4rem; margin-top: .6rem; color: #fff7dc; font-size: .82rem; font-weight: 720; text-shadow: 0 1px 6px #102721, 0 1px 2px #102721; }
+.island-stage-status { position: absolute; z-index: 2; inset: 45% 10% auto; color: #173f35; font-weight: 720; text-align: center; }
+
+.island-minimap { position: absolute; z-index: 2; top: var(--stage-gutter); right: var(--stage-gutter); width: clamp(7.3rem, 14vw, 10.2rem); border: 1px solid #ecce846f; border-radius: .65rem; background: #142e2aed; box-shadow: 0 8px 24px #10232165; overflow: hidden; pointer-events: none; }
+.island-minimap[hidden], .island-pin[hidden] { display: none; }
+.island-minimap-art { position: relative; }
+.island-minimap-art canvas { display: block; width: 100%; height: auto; }
+.island-minimap-north { position: absolute; left: .36rem; top: .27rem; color: #fff0c3; font-size: .64rem; font-weight: 800; }
+.island-minimap-player { position: absolute; top: 50%; left: 50%; width: 10px; height: 11px; border-radius: 2px; background: #fff6cd; box-shadow: 0 0 9px #fff6ad; transform: translate(-50%, -50%); clip-path: polygon(50% 0, 100% 100%, 50% 77%, 0 100%); }
+.island-minimap-label { display: block; padding: .33rem .4rem; border-top: 1px solid #ecce842e; color: #eee3bd; font-size: .66rem; font-weight: 750; text-align: center; }
+
+.island-markers { position: absolute; z-index: 2; inset: 0; pointer-events: none; }
 .island-pin {
   position: absolute;
   display: flex;
   align-items: center;
-  gap: .34rem;
+  gap: .35rem;
   min-height: 2rem;
-  padding: .38rem .63rem;
-  border: 1px solid #b6cdb5;
-  border-radius: 99px;
-  background: #fbfff0;
-  box-shadow: 0 3px 12px #143c3233;
+  padding: .35rem .6rem;
+  border: 1px solid #dabc7d9c;
+  border-radius: .45rem;
+  background: #142d29f5;
+  box-shadow: 0 4px 11px #12333077;
   transform: translate(-50%, -100%);
-  color: #173f31;
-  font-size: .78rem;
-  font-weight: 800;
+  color: #fbf5df;
+  font-size: .77rem;
+  font-weight: 750;
   white-space: nowrap;
   pointer-events: auto;
   cursor: pointer;
 }
-.island-pin[aria-pressed="true"] { z-index: 1; border-color: #235747; background: #235747; color: #fcffef; }
-.island-help { position: absolute; inset: auto auto 1rem 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 2rem); padding: .5rem .85rem; border-radius: 99px; color: #f4faeb; background: #153d34ed; font-size: .8rem; text-align: center; pointer-events: none; }
+.island-pin[aria-pressed="true"] { z-index: 1; border-color: #ecd39d; background: #e9ce94; color: #1b302a; }
+.island-area, .island-help, .island-scene-actions { position: absolute; z-index: 3; bottom: var(--stage-gutter); }
+.island-area { display: flex; align-items: center; gap: .55rem; left: var(--stage-gutter); padding: .6rem .75rem; border: 1px solid #e0c58879; border-radius: .5rem; background: #132d2be8; color: #fff5da; font-size: .8rem; font-weight: 760; pointer-events: none; }
+.island-area svg { color: var(--island-accent); }
+.island-scene-actions { right: var(--stage-gutter); display: flex; gap: .4rem; }
+.island-motion-toggle[aria-pressed="true"] { border-color: #ecd39d; }
+.island-help { left: 50%; width: max-content; max-width: calc(100% - 2rem); padding: .58rem .75rem; border-radius: .5rem; color: #fbf6e6; background: #122c29e8; font-size: .75rem; text-align: center; transform: translateX(-50%); pointer-events: none; }
+.island-help kbd { padding: .12rem .25rem; border: 1px solid #d0c6a74c; border-radius: .2rem; color: #ffe6b2; font: 750 .7rem/1.2 system-ui; }
+.island-help-desktop > span { padding-inline: .3rem; color: var(--island-accent); }
 .island-help-touch { display: none; }
 
-.island-dock { margin-top: .8rem; padding: clamp(.8rem, 2vw, 1.2rem); border: 1px solid #dbe5d8; border-radius: 1.2rem; background: #fff; }
-.island-destinations { display: flex; flex-wrap: wrap; gap: .48rem; }
-.island-destination { display: flex; align-items: center; justify-content: center; gap: .4rem; min-height: 2.65rem; padding: .5rem .8rem; border: 1px solid #d6e3d2; border-radius: .75rem; color: #254839; background: #f2f6ee; font-size: .85rem; font-weight: 750; cursor: pointer; }
-.island-destination:hover { border-color: #759a76; }
-.island-destination[aria-pressed="true"] { color: #fff; background: #18543b; border-color: #18543b; }
-.island-detail { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .8rem; margin-top: .85rem; padding-top: .85rem; border-top: 1px solid #e6eee3; }
-.island-detail-icon { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; color: #18543b; border-radius: .75rem; background: #edf5e7; }
-.island-detail h2 { font: 800 1.17rem/1.3 var(--font-display); }
-.island-detail p { margin-top: .25rem; color: #4c6156; font-size: .9rem; }
+.island-dock { margin-top: .95rem; padding: clamp(.85rem, 2vw, 1.35rem); border: 1px solid var(--island-border); border-radius: .8rem; background: #192f2c; }
+.island-dock-title { display: flex; align-items: center; gap: .5rem; margin: 0 0 .8rem; color: var(--island-ink); font: 800 1.12rem/1.25 var(--font-display); }
+.island-dock-title svg { color: var(--island-accent); }
+.island-destinations { display: flex; flex-wrap: wrap; gap: .45rem; }
+.island-destination { display: flex; align-items: center; justify-content: center; gap: .42rem; min-height: 2.65rem; padding: .5rem .74rem; border: 1px solid #94a88956; border-radius: .5rem; color: #e8eee1; background: #233e35; font-size: .81rem; font-weight: 730; cursor: pointer; }
+.island-destination:hover { border-color: var(--island-accent); }
+.island-destination[aria-pressed="true"] { color: #1b302a; background: var(--island-accent); border-color: var(--island-accent); }
+.island-detail { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .8rem; margin-top: .85rem; padding-top: .85rem; border-top: 1px solid var(--island-border); }
+.island-detail-icon { display: grid; place-items: center; width: 2.55rem; height: 2.55rem; color: var(--island-accent); border: 1px solid #dbc28d38; border-radius: .5rem; background: #253d33; }
+.island-detail h2 { color: var(--island-ink); font: 800 1.1rem/1.28 var(--font-display); }
+.island-detail p { margin-top: .25rem; color: var(--island-muted); font-size: .88rem; }
+.island-detail .hub-button-primary { border-color: var(--island-accent); background: var(--island-accent); color: #1b302a; }
+
+@media (max-width: 880px) {
+  .island-help { bottom: calc(var(--stage-gutter) + 3.25rem); }
+}
 
 @media (max-width: 670px) {
-  .island-stage { height: clamp(360px, 61svh, 550px); }
+  .island-stage { height: clamp(410px, 70svh, 640px); }
   .island-detail { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
   .island-detail .hub-button { grid-column: 1 / -1; justify-self: start; }
-  .island-pin { padding: .31rem .47rem; }
-  .island-pin span { font-size: .69rem; }
+  .island-pin { padding: .31rem .43rem; }
+  .island-pin span { font-size: .67rem; }
   .island-pin svg { display: none; }
+}
+
+@media (max-width: 390px) {
+  .island-motion-toggle { min-width: 2.65rem; padding-inline: .5rem; }
+  .island-motion-toggle span { display: none; }
 }
 
 @media (pointer: coarse) {
