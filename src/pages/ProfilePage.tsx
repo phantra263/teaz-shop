@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import CountUp from "react-countup";
-import { Download, Menu, X } from "lucide-react";
+import { Mail, Menu, X } from "lucide-react";
 import { site } from "../data/site";
-import { FacebookIcon, TikTokIcon } from "../components/icons";
+import { shopeePriceTool } from "../data/tools";
+import { FacebookIcon, TikTokIcon, YouTubeIcon } from "../components/icons";
 
 const stats = [
-  { num: 3, text: "Years of experience" },
+  { num: 5, suffix: "+", text: "Years of experience" },
   { num: 20, text: "Projects completed" },
   { num: 10, text: "Technologies used" },
   { num: 100, text: "Code commits" },
@@ -17,6 +18,7 @@ const socials = [
   { name: "Facebook", href: site.facebookPageUrl, icon: <FacebookIcon className="h-4 w-4" /> },
   { name: "GitHub", href: "https://github.com/phantra263", icon: <GithubIcon /> },
   { name: "TikTok", href: site.tiktokProfileUrl, icon: <TikTokIcon className="h-4 w-4" /> },
+  { name: "YouTube", href: site.youtubeChannelUrl, icon: <YouTubeIcon className="h-4 w-4" /> },
 ];
 
 function GithubIcon() {
@@ -91,14 +93,14 @@ export function ProfilePage() {
               I&apos;m a frontend developer with a passion for building web applications.
             </p>
             <div className="flex flex-col items-center gap-4 xl:flex-row">
-              <button
-                type="button"
+              <a
+                href={`mailto:${site.bookingEmail}`}
                 className="flex items-center gap-2 rounded-full border border-[#00ff99] px-8 py-3 text-sm font-medium tracking-wide text-[#00ff99] uppercase transition duration-300 hover:bg-[#00ff99] hover:text-black"
               >
-                <span>Download CV</span>
-                <Download className="h-5 w-5" aria-hidden="true" />
-              </button>
-              <div className="mb-8 flex gap-6 xl:mb-0">
+                <span>Liên hệ</span>
+                <Mail className="h-5 w-5" aria-hidden="true" />
+              </a>
+              <div className="mb-8 flex flex-wrap justify-center gap-4 xl:mb-0">
                 {socials.map((item) => (
                   <a
                     key={item.name}
@@ -157,10 +159,14 @@ export function ProfilePage() {
             {stats.map((stat) => (
               <div key={stat.text} className="flex flex-1 items-center justify-center gap-4 xl:justify-start">
                 {reduceMotion ? (
-                  <span className="text-4xl font-extrabold xl:text-6xl">{stat.num}</span>
+                  <span className="text-4xl font-extrabold xl:text-6xl">
+                    {stat.num}
+                    {stat.suffix}
+                  </span>
                 ) : (
                   <CountUp
                     end={stat.num}
+                    suffix={stat.suffix}
                     duration={3}
                     delay={0.4}
                     className="text-4xl font-extrabold xl:text-6xl"
@@ -172,6 +178,23 @@ export function ProfilePage() {
               </div>
             ))}
           </div>
+        </section>
+        <section className="mx-auto max-w-4xl rounded-3xl border border-white/15 bg-[#22262b] p-5 sm:p-8" aria-labelledby="creator-project-title">
+          <h2 id="creator-project-title" className="text-2xl font-semibold text-white">Dự án TeaZ Review</h2>
+          <p className="mt-3 max-w-2xl leading-relaxed text-white/75">
+            Website mình xây dựng để kết nối nội dung review trên TikTok, YouTube và Facebook với danh mục sản phẩm và bộ sưu tập Shopee.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3">
+            <Link className="text-[#00ff99] underline underline-offset-4 hover:text-white" to="/">Xem TeaZ Review</Link>
+            <a className="text-[#00ff99] underline underline-offset-4 hover:text-white" href="/#hop-tac">Hợp tác nội dung</a>
+          </div>
+        </section>
+        <section className="mx-auto mt-5 max-w-4xl rounded-3xl border border-white/15 bg-[#22262b] p-5 sm:p-8" aria-labelledby="profile-tools-title">
+          <h2 id="profile-tools-title" className="text-2xl font-semibold text-white">Công cụ Chrome</h2>
+          <p className="mt-3 leading-relaxed text-white/75">{shopeePriceTool.name}</p>
+          <Link className="mt-4 inline-flex text-[#00ff99] underline underline-offset-4 hover:text-white" to={shopeePriceTool.path}>
+            Xem tiện ích và cách dùng
+          </Link>
         </section>
       </main>
     </div>

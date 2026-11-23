@@ -1,65 +1,43 @@
 import { Link } from "react-router-dom";
-import { Share2 } from "lucide-react";
+import { Play, Pause, Share2 } from "lucide-react";
+import { servicesPage } from "../data/services";
 
 interface ToolbarProps {
-  leavesOn: boolean;
-  onToggleLeaves: () => void;
   onShare: () => void;
+  motionEnabled: boolean;
+  onToggleMotion: () => void;
 }
 
-export function Toolbar({ leavesOn, onToggleLeaves, onShare }: ToolbarProps) {
+export function Toolbar({ onShare, motionEnabled, onToggleMotion }: ToolbarProps) {
   return (
-    <div className="mb-4 flex items-center justify-between gap-3 lg:mb-8">
-      <button
-        type="button"
-        onClick={onToggleLeaves}
-        aria-pressed={leavesOn}
-        title="Bật hoặc tắt hiệu ứng lá trà"
-        className="flex items-center gap-1.5 rounded-full border border-tea-100 bg-white/80 px-3 py-1.5 text-xs font-medium text-tea-800 shadow-sm backdrop-blur-sm transition hover:bg-white"
-      >
-        <span aria-hidden="true">🍃</span>
-        <span>{leavesOn ? "Hiệu ứng: Bật" : "Hiệu ứng: Tắt"}</span>
-      </button>
-
-      <nav
-        aria-label="Trong trang"
-        className="hidden items-center gap-1 rounded-full border border-white/80 bg-white/70 p-1 shadow-sm backdrop-blur-sm lg:flex"
-      >
-        <a
-          href="#san-pham"
-          className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-tea-50 hover:text-tea-800"
-        >
-          Sản phẩm
-        </a>
-        <a
-          href="#ve-teaz"
-          className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-tea-50 hover:text-tea-800"
-        >
-          Về TeaZ
-        </a>
-        <a
-          href="#cau-hoi"
-          className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-tea-50 hover:text-tea-800"
-        >
-          Câu hỏi
-        </a>
-        <Link
-          to="/profile"
-          className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-tea-50 hover:text-tea-800"
-        >
-          Portfolio
-        </Link>
+    <header className="hub-toolbar">
+      <a href="#dau-trang" className="hub-brand" aria-label="TeaZ Review, đầu trang">
+        <img src="/avatar.png" alt="" width="42" height="42" />
+        <span>TeaZ <strong>Review</strong></span>
+      </a>
+      <nav aria-label="Điều hướng chính" className="hub-nav">
+        <a href="#kenh-noi-dung">Các kênh</a>
+        <a href="#san-pham">Sản phẩm</a>
+        <a href="#cong-cu">Công cụ</a>
+        <Link to={servicesPage.path}>Dịch vụ</Link>
+        <a href="#hop-tac">Hợp tác</a>
+        <Link to="/profile">Portfolio</Link>
       </nav>
-
-      <button
-        type="button"
-        onClick={onShare}
-        title="Chia sẻ trang Bio"
-        aria-label="Chia sẻ trang Bio"
-        className="rounded-full border border-slate-200/70 bg-white/80 p-2 text-slate-700 shadow-sm backdrop-blur-sm transition hover:bg-white hover:text-tea-700"
-      >
-        <Share2 className="h-4 w-4" aria-hidden="true" />
-      </button>
-    </div>
+      <div className="hub-toolbar-actions">
+        <button
+          className="hub-icon-button"
+          type="button"
+          onClick={onToggleMotion}
+          aria-pressed={motionEnabled}
+          aria-label="Hiệu ứng chuyển động"
+          title={motionEnabled ? "Tắt hiệu ứng chuyển động" : "Bật hiệu ứng chuyển động"}
+        >
+          {motionEnabled ? <Pause size={17} aria-hidden="true" /> : <Play size={17} aria-hidden="true" />}
+        </button>
+        <button className="hub-icon-button" type="button" onClick={onShare} aria-label="Chia sẻ trang TeaZ">
+          <Share2 size={18} aria-hidden="true" />
+        </button>
+      </div>
+    </header>
   );
 }

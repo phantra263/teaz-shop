@@ -23,7 +23,7 @@ export function InAppBanner() {
         </div>
         <div className="flex-1 text-xs leading-relaxed">
           <p className="mb-0.5 text-sm font-semibold text-tea-300">
-            Mở bằng trình duyệt ngoài để áp mã Shopee!
+            Gặp lỗi khi mở link Shopee?
           </p>
           <p className="text-slate-300">
             Bấm dấu{" "}
@@ -34,7 +34,7 @@ export function InAppBanner() {
             <span className="font-semibold text-white underline">
               Mở bằng trình duyệt (Safari/Chrome)
             </span>{" "}
-            để tự nhảy sang App Shopee.
+            rồi bấm lại liên kết.
           </p>
         </div>
         <button

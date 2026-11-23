@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Mail } from "lucide-react";
 import { site } from "../data/site";
 import { copyText } from "../lib/clipboard";
+import { useShopMotion } from "../hooks/useShopMotion";
 import { useToast } from "../hooks/useToast";
 import { AboutSection } from "../components/AboutSection";
 import { ContactModal } from "../components/ContactModal";
 import { FallingLeaves } from "../components/FallingLeaves";
+import { FeaturedTool } from "../components/FeaturedTool";
 import { InAppBanner } from "../components/InAppBanner";
 import { LinkCards } from "../components/LinkCards";
 import { ProductList } from "../components/ProductList";
@@ -12,82 +16,76 @@ import { ProfileHeader } from "../components/ProfileHeader";
 import { SiteFooter } from "../components/SiteFooter";
 import { Toast } from "../components/Toast";
 import { Toolbar } from "../components/Toolbar";
+import { ToolBanner } from "../components/ToolBanner";
+import "./shop.css";
 
 export function ShopPage() {
   const { message, showToast } = useToast();
   const [contactOpen, setContactOpen] = useState(false);
-  const [leavesOn, setLeavesOn] = useState(true);
+  const [leavesOn, setLeavesOn] = useState(false);
+  const { motionEnabled, toggleMotion } = useShopMotion();
 
   useEffect(() => {
-    document.title = "TeaZ Review | Săn Deal Chuẩn (@teaz_shop)";
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setLeavesOn(false);
-    }
+    document.title = site.brandName;
   }, []);
 
-  const openContact = useCallback(() => setContactOpen(true), []);
   const closeContact = useCallback(() => setContactOpen(false), []);
+  const copyPageLink = useCallback(async () => {
+    try {
+      await copyText(window.location.href);
+      showToast("Đã sao chép link TeaZ Review.");
+    } catch {
+      showToast("Không thể sao chép. Bạn có thể lấy link trên thanh địa chỉ.");
+    }
+  }, [showToast]);
 
   const handleShare = useCallback(async () => {
-    const url = window.location.href;
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: site.brandName,
-          text: site.shareText,
-          url,
-        });
+        await navigator.share({ title: site.brandName, text: site.shareText, url: window.location.href });
         return;
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
       }
     }
-    await copyText(url);
-    showToast("Đã sao chép đường dẫn trang Bio!");
-  }, [showToast]);
-
-  const handleCopyLink = useCallback(async () => {
-    await copyText(window.location.href);
-    showToast("Đã sao chép đường dẫn trang Bio!");
-  }, [showToast]);
+    await copyPageLink();
+  }, [copyPageLink]);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-b from-tea-50 via-cream to-stone-100 text-slate-800 antialiased selection:bg-tea-200 selection:text-tea-900">
-      <a
-        href="#noi-dung"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-tea-800 focus:shadow"
-      >
+    <div className="hub" id="dau-trang" data-motion-enabled={motionEnabled}>
+      <a href="#noi-dung" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-3">
         Đi tới nội dung
       </a>
-      <FallingLeaves enabled={leavesOn} />
+      <FallingLeaves enabled={motionEnabled && leavesOn} />
       <InAppBanner />
-      <main
-        id="noi-dung"
-        className="relative z-10 mx-auto w-full max-w-[480px] px-4 pt-6 pb-20 lg:max-w-6xl lg:px-8 lg:pt-8 lg:pb-16"
-      >
-        <Toolbar
-          leavesOn={leavesOn}
-          onToggleLeaves={() => setLeavesOn((value) => !value)}
-          onShare={() => {
-            void handleShare();
-          }}
-        />
-        <div className="lg:grid lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] lg:items-start lg:gap-8">
-          <aside className="lg:sticky lg:top-6">
-            <ProfileHeader onContact={openContact} />
-            <LinkCards onContact={openContact} />
-          </aside>
+      <div className="hub-container">
+        <Toolbar onShare={() => void handleShare()} motionEnabled={motionEnabled} onToggleMotion={toggleMotion} />
+        <main id="noi-dung">
+          <ProfileHeader motionEnabled={motionEnabled} />
+          <ToolBanner />
+          <LinkCards />
           <ProductList />
-        </div>
-        <AboutSection />
-        <SiteFooter onCopyLink={() => void handleCopyLink()} />
-      </main>
+          <FeaturedTool />
+          <section className="hub-section hub-booking" id="hop-tac" aria-labelledby="booking-title">
+            <div>
+              <h2 className="hub-heading" id="booking-title">Hợp tác cùng TeaZ</h2>
+              <p className="hub-description">
+                Gửi brief, thông tin sản phẩm và kênh bạn muốn triển khai để trao đổi về video review hoặc chiến dịch affiliate.
+              </p>
+            </div>
+            <div className="hub-actions">
+              <button className="hub-button hub-button-primary" type="button" onClick={() => setContactOpen(true)}>
+                <Mail size={18} aria-hidden="true" /> Liên hệ booking
+              </button>
+              <Link className="hub-button hub-button-secondary" to="/profile">Portfolio Trà Phan</Link>
+            </div>
+          </section>
+          <AboutSection />
+        </main>
+        <SiteFooter onCopyLink={() => void copyPageLink()} leavesOn={leavesOn} onToggleLeaves={() => setLeavesOn((value) => !value)} />
+      </div>
       <Toast message={message} />
-      <ContactModal
-        open={contactOpen}
-        onClose={closeContact}
-        onCopied={showToast}
-      />
+      {contactOpen && <ContactModal onClose={closeContact} />}
     </div>
   );
 }

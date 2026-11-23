@@ -13,10 +13,9 @@ export interface Product {
   category: "beauty" | "home" | "fashion" | "tech";
   categoryLabel: string;
   description: string;
-  badge: string;
   icon: string;
-  shopeeUrl: string;
-  tiktokUrl: string;
+  shopeeUrl?: string;
+  reviewUrl?: string;
 }
 
 export const SITE_URL = (
@@ -24,18 +23,14 @@ export const SITE_URL = (
 ).replace(/\/$/, "");
 
 export const site = {
-  brandName: "TeaZ Review | Săn Deal Chuẩn",
+  brandName: "TeaZ Review | Review sản phẩm, Shopee & TikTok Shop",
   handle: "@teaz_shop",
-  followersLabel: "1.2K+ Followers",
-  bioLead: "Review có tâm – Chọn đồ chất lượng",
-  bioRest: "Tổng hợp Deal hời TikTok Shop & Shopee mỗi ngày",
-  description:
-    "Review có tâm – Chọn đồ chất lượng. TeaZ Review (@teaz_shop) tổng hợp deal hời TikTok Shop và Shopee: làm đẹp, gia dụng, thời trang và công nghệ.",
   shopeeCollectionUrl: "https://collshp.com/phancongtra",
   tiktokProfileUrl: "https://www.tiktok.com/@teaz_shop",
+  youtubeChannelUrl: "https://www.youtube.com/@traz6298",
   facebookPageUrl: "https://www.facebook.com/teaz.code",
-  bookingEmail: "booking@vinhanadv.online",
-  shareText: "Tổng hợp deal hời TikTok Shop & Shopee từ TeaZ Review",
+  bookingEmail: "phantra2212@gmail.com",
+  shareText: "Review sản phẩm, bộ sưu tập Shopee và các kênh của TeaZ Review.",
 } as const;
 
 export const categories = [
@@ -56,10 +51,7 @@ export const products: Product[] = [
     categoryLabel: "Làm đẹp",
     description:
       "Cấp ẩm căng bóng 2 lớp tinh chất nấm Truffle trắng, tia sương siêu mịn.",
-    badge: "Bán chạy #1",
     icon: "✨",
-    shopeeUrl: site.shopeeCollectionUrl,
-    tiktokUrl: site.tiktokProfileUrl,
   },
   {
     id: 2,
@@ -68,10 +60,7 @@ export const products: Product[] = [
     categoryLabel: "Gia dụng",
     description:
       "Chống dính gốm an toàn, tháo cán xếp gọn tiết kiệm 70% diện tích bếp.",
-    badge: "Deal Hời",
     icon: "🍳",
-    shopeeUrl: site.shopeeCollectionUrl,
-    tiktokUrl: site.tiktokProfileUrl,
   },
   {
     id: 3,
@@ -80,10 +69,7 @@ export const products: Product[] = [
     categoryLabel: "Thời trang",
     description:
       "Chất vải thoáng mát, co giãn nhẹ, form đứng dáng dễ phối đi làm & đi chơi.",
-    badge: "Gợi ý",
     icon: "👕",
-    shopeeUrl: site.shopeeCollectionUrl,
-    tiktokUrl: site.tiktokProfileUrl,
   },
   {
     id: 4,
@@ -92,32 +78,29 @@ export const products: Product[] = [
     categoryLabel: "Công nghệ",
     description:
       "Cáp truyền dữ liệu tốc độ cao & phụ kiện gọn góc làm việc đa thiết bị.",
-    badge: "Mới",
     icon: "⚡",
-    shopeeUrl: site.shopeeCollectionUrl,
-    tiktokUrl: site.tiktokProfileUrl,
   },
 ];
 
 export const aboutParagraphs = [
-  "TeaZ Review (@teaz_shop) gom link các sản phẩm đã review trên TikTok Shop và Shopee. Mỗi món được chọn sau khi dùng thực tế: nói rõ điểm hợp, điểm chưa hợp, rồi gắn link bộ sưu tập để tự đối chiếu giá.",
-  "Trang này dành cho người xem video của TeaZ và cần một chỗ để mở giỏ Shopee, giỏ TikTok Shop, hoặc nhắn booking review cho nhãn hàng.",
+  "Mình là Trà Phan, người làm nội dung tại TeaZ Review. Mình chia sẻ góc nhìn về đồ làm đẹp, gia dụng, thời trang và công nghệ để bạn cân nhắc món nào hợp với nhu cầu của mình.",
+  "Bạn có thể xem nội dung trên TikTok và YouTube, tìm sản phẩm trong bộ sưu tập Shopee hoặc theo dõi những chia sẻ về công nghệ trên Facebook TeaZ Code.",
 ];
 
 export const faqs = [
   {
-    question: "Deal trên trang này lấy từ đâu?",
+    question: "Làm sao tìm sản phẩm trong video của TeaZ?",
     answer:
-      "Từ video review trên TikTok @teaz_shop và bộ sưu tập Shopee của TeaZ. Link dẫn tới gian hàng hoặc bộ sưu tập, không phải trang trung gian giữ link.",
+      "Nhập tên sản phẩm vào ô tìm kiếm hoặc lọc theo danh mục. Nút Bộ sưu tập Shopee mở danh sách chung để bạn tìm món cần mua.",
   },
   {
     question: "Vì sao bấm Shopee trong TikTok đôi khi không mở app?",
     answer:
-      "Trình duyệt nhúng của TikTok và Facebook thường chặn chuyển sang app Shopee. Hãy mở trang này bằng Safari hoặc Chrome (menu ••• rồi chọn Mở bằng trình duyệt) rồi bấm lại link.",
+      "Nếu trình duyệt trong TikTok hoặc Facebook không mở được liên kết, chọn Mở bằng trình duyệt trong menu rồi thử lại bằng Safari hoặc Chrome.",
   },
   {
     question: "Nhãn hàng muốn gửi sản phẩm review thì liên hệ thế nào?",
     answer:
-      "Gửi brief và thông tin mẫu qua email booking@vinhanadv.online hoặc nhắn Fanpage TeaZ Code. TeaZ ưu tiên sản phẩm có thể review thẳng trên TikTok Shop.",
+      `Gửi brief, thông tin sản phẩm và kênh mong muốn qua ${site.bookingEmail} hoặc nhắn Facebook TeaZ Code.`,
   },
 ] as const;

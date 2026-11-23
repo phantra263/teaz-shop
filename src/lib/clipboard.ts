@@ -7,9 +7,15 @@ export async function copyText(text: string): Promise<void> {
     input.setAttribute("readonly", "");
     input.style.position = "fixed";
     input.style.left = "-9999px";
-    document.body.appendChild(input);
-    input.select();
-    document.execCommand("copy");
-    document.body.removeChild(input);
+    const focused = document.activeElement;
+    const container = focused?.closest("dialog[open]") ?? document.body;
+    container.appendChild(input);
+    try {
+      input.select();
+      if (!document.execCommand("copy")) throw new Error("Clipboard copy failed.");
+    } finally {
+      input.remove();
+      if (focused instanceof HTMLElement) focused.focus();
+    }
   }
 }
