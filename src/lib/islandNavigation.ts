@@ -1,4 +1,4 @@
-import { islandGround, pondBankDistance } from "./islandTerrain";
+import { islandBounds, islandCoastRatio, islandGround, islandLandRadius, pondBankDistance } from "./islandTerrain";
 
 type Point = { x: number; z: number };
 type SolidKind = "tree" | "rock" | "building";
@@ -7,8 +7,8 @@ type Solid = { x: number; z: number; width: number; depth: number; cos: number; 
 
 const playerRadius = 0.24;
 const cellSize = 0.48;
-const columnCount = Math.ceil(islandGround.x * 2 / cellSize) + 1;
-const rowCount = Math.ceil(islandGround.z * 2 / cellSize) + 1;
+const columnCount = Math.ceil(islandBounds.x * 2 / cellSize) + 1;
+const rowCount = Math.ceil(islandBounds.z * 2 / cellSize) + 1;
 const directions = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]] as const;
 
 export function createIslandNavigation() {
@@ -16,7 +16,7 @@ export function createIslandNavigation() {
   let grid: Uint8Array | undefined;
 
   function obstacleAt(x: number, z: number, padding = playerRadius): IslandObstacle | undefined {
-    if (Math.hypot(x / (islandGround.x - padding), z / (islandGround.z - padding)) > 1 || pondBankDistance(x, z) < padding) return "water";
+    if (islandCoastRatio(x, z) > islandLandRadius - padding / islandGround.z || pondBankDistance(x, z) < padding) return "water";
     for (const solid of solids) {
       const dx = x - solid.x;
       const dz = z - solid.z;
@@ -40,12 +40,12 @@ export function createIslandNavigation() {
   }
 
   function cellPoint(index: number): Point {
-    return { x: index % columnCount * cellSize - islandGround.x, z: Math.floor(index / columnCount) * cellSize - islandGround.z };
+    return { x: index % columnCount * cellSize - islandBounds.x, z: Math.floor(index / columnCount) * cellSize - islandBounds.z };
   }
 
   function nearbyCell(point: Point, walkable: Uint8Array, link: boolean) {
-    const cx = Math.round((point.x + islandGround.x) / cellSize);
-    const cz = Math.round((point.z + islandGround.z) / cellSize);
+    const cx = Math.round((point.x + islandBounds.x) / cellSize);
+    const cz = Math.round((point.z + islandBounds.z) / cellSize);
     for (let ring = 0; ring <= 7; ring++) {
       let nearest = -1;
       let distance = Infinity;

@@ -1,5 +1,5 @@
-import { Color, Mesh, PlaneGeometry, ShaderMaterial, UniformsLib, UniformsUtils, Vector2 } from "three";
-import { islandGround } from "./islandTerrain";
+import { Color, Mesh, PlaneGeometry, ShaderMaterial, UniformsLib, UniformsUtils, Vector2, Vector4 } from "three";
+import { islandCoastBase, islandCoastDirections, islandGround } from "./islandTerrain";
 
 export function createIslandWater() {
   const geometry = new PlaneGeometry(260, 260);
@@ -9,19 +9,23 @@ export function createIslandWater() {
       UniformsLib.fog,
       {
         time: { value: 0 },
-        coast: { value: new Vector2(islandGround.x + 0.2, islandGround.z + 0.45) },
-        deepColor: { value: new Color("#469d9f") },
-        shallowColor: { value: new Color("#84d7b6") },
-        glintColor: { value: new Color("#d4f6dd") },
-        foamColor: { value: new Color("#effbe5") },
+        coast: { value: new Vector2(islandGround.x, islandGround.z) },
+        coastFeatures: { value: islandCoastDirections.map(({ x, z, depth, sharpness }) => new Vector4(x, z, depth, sharpness)) },
+        deepColor: { value: new Color("#407f97") },
+        shallowColor: { value: new Color("#83c8b3") },
+        glintColor: { value: new Color("#c6e5e3") },
+        foamColor: { value: new Color("#e1f2e6") },
       },
     ]),
     vertexShader: /* glsl */ `
       #include <fog_pars_vertex>
       varying vec2 waterPosition;
+      varying vec3 waterView;
 
       void main() {
-        waterPosition = (modelMatrix * vec4(position, 1.0)).xz;
+        vec3 worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+        waterPosition = worldPosition.xz;
+        waterView = cameraPosition - worldPosition;
         vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
         gl_Position = projectionMatrix * mvPosition;
         #include <fog_vertex>
@@ -30,8 +34,10 @@ export function createIslandWater() {
     fragmentShader: /* glsl */ `
       #include <fog_pars_fragment>
       varying vec2 waterPosition;
+      varying vec3 waterView;
       uniform float time;
       uniform vec2 coast;
+      uniform vec4 coastFeatures[${islandCoastDirections.length}];
       uniform vec3 deepColor;
       uniform vec3 shallowColor;
       uniform vec3 glintColor;
@@ -39,26 +45,42 @@ export function createIslandWater() {
 
       void main() {
         vec2 p = waterPosition;
-        float shore = (length(p / coast) - 1.0) * (coast.y + 1.0);
-        shore += 0.12 * sin(p.x * 1.6 + p.y * 0.85);
-        float shallows = 1.0 - smoothstep(0.0, 4.5, shore);
-        float swell = sin(dot(p, vec2(0.95, 1.75)) - time * 1.35);
-        float crossSwell = sin(dot(p, vec2(-1.35, 0.62)) + time * 0.92);
-        float drift = sin(dot(p, vec2(0.58, -0.43)) + time * 0.39);
-        float eddy = sin(dot(p, vec2(0.26, 0.72)) - time * 0.51);
-        float ripple = sin(dot(p, vec2(1.48, 2.45)) + crossSwell * 0.64 + drift * 1.8 + eddy - time * 1.72);
-        float sparkle = sin(dot(p, vec2(-2.13, 0.77)) + eddy * 1.2 + time * 0.7);
-        float glint = smoothstep(0.86, 0.995, ripple) * smoothstep(-0.05, 0.8, crossSwell + sparkle * 0.45);
-
+        vec2 ellipse = p / coast;
+        float radius = max(length(ellipse), 0.0001);
+        vec2 direction = ellipse / radius;
+        vec2 tangent = vec2(-direction.y, direction.x);
+        float coastRadius = ${islandCoastBase};
+        float coastSlope = 0.0;
+        for (int i = 0; i < ${islandCoastDirections.length}; i++) {
+          vec4 feature = coastFeatures[i];
+          float lobe = feature.z * exp(feature.w * (dot(direction, feature.xy) - 1.0));
+          coastRadius += lobe;
+          coastSlope += lobe * feature.w * dot(tangent, feature.xy);
+        }
+        vec2 coastGradient = (direction - tangent * coastSlope / radius) / coast;
+        float shore = (radius - coastRadius) / max(length(coastGradient), 0.0001);
+        float shallows = 1.0 - smoothstep(0.15, 5.65, shore);
+        float swell = dot(p, vec2(0.38, 0.63)) - time * 0.53;
+        float crossSwell = dot(p, vec2(-0.64, 0.30)) + time * 0.41;
+        float drift = sin(dot(p, vec2(0.17, -0.23)) + time * 0.22);
+        float ripple = dot(p, vec2(1.37, 1.74)) + sin(crossSwell) * 0.74 + drift * 1.21 - time * 0.79;
+        float detail = 1.0 - smoothstep(0.45, 1.45, fwidth(ripple));
+        vec2 slope = cos(swell) * vec2(0.038, 0.063) + cos(crossSwell) * vec2(-0.033, 0.019);
+        slope += cos(ripple) * vec2(0.010, 0.018) * detail;
+        vec3 normal = normalize(vec3(-slope.x, 1.0, -slope.y));
+        vec3 sight = normalize(waterView);
+        float reflection = pow(1.0 - clamp(dot(normal, sight), 0.0, 1.0), 2.4);
+        float glint = smoothstep(0.49, 1.0, cos(ripple)) * (0.32 + 0.68 * smoothstep(-0.6, 1.0, sin(crossSwell) + drift * 0.41));
         vec3 color = mix(deepColor, shallowColor, shallows);
-        color *= 1.0 + swell * 0.055 + crossSwell * 0.038;
-        color = mix(color, glintColor, glint * mix(0.17, 0.39, shallows));
+        color *= 1.0 + sin(swell) * 0.029 + sin(crossSwell) * 0.020;
+        color = mix(color, glintColor, reflection * 0.25 + glint * detail * mix(0.077, 0.14, shallows));
 
-        float tide = sin(time * 1.02 + p.x * 0.3 + p.y * 0.2);
-        float innerFoam = 1.0 - smoothstep(0.025, 0.185, abs(shore - 0.67 - tide * 0.16));
-        float outerFoam = 1.0 - smoothstep(0.025, 0.12, abs(shore - 1.55 - tide * 0.23));
-        float brokenEdge = smoothstep(-0.52, 0.4, sin(p.x * 1.1 - p.y * 0.91 + time * 0.7));
-        color = mix(color, foamColor, innerFoam * (0.34 + 0.42 * brokenEdge) + outerFoam * brokenEdge * 0.31);
+        float foamPhase = shore * 2.48 + time * 0.75 + drift * 0.46;
+        float crest = smoothstep(0.72, 0.98, cos(foamPhase));
+        float shoreline = smoothstep(0.04, 0.29, shore) * (1.0 - smoothstep(0.52, 2.3, shore));
+        float breaks = smoothstep(-0.55, 0.71, sin(dot(p, vec2(0.71, -0.64)) + drift * 0.94 + time * 0.19));
+        float wash = exp(-abs(shore - 0.24) * 4.4) * (0.055 + breaks * 0.057);
+        color = mix(color, foamColor, wash + crest * shoreline * (0.045 + breaks * 0.30));
 
         gl_FragColor = vec4(color, 1.0);
         #include <tonemapping_fragment>

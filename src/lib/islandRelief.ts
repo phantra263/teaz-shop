@@ -1,9 +1,10 @@
 import { BufferGeometry, Color, Float32BufferAttribute, type Vector3 } from "three";
-import { islandElevation, islandGround } from "./islandTerrain";
+import { islandCoastPoint, islandElevation, islandGround, islandLandRadius } from "./islandTerrain";
+
+const radialSegments = 192;
 
 export function createIslandRelief() {
   const geometry = new BufferGeometry();
-  const radialSegments = 192;
   const bands = 88;
   const positions = [0, islandElevation(0, 0) + 0.09, 0];
   const colors = [1, 1, 1];
@@ -18,8 +19,7 @@ export function createIslandRelief() {
     const radius = band / bands;
     for (let segment = 0; segment < radialSegments; segment++) {
       const angle = segment / radialSegments * Math.PI * 2;
-      const x = Math.cos(angle) * radius * islandGround.x;
-      const z = Math.sin(angle) * radius * islandGround.z;
+      const { x, z } = islandCoastPoint(angle, radius * islandLandRadius);
       const elevation = islandElevation(x, z);
       const grain = 0.5 + 0.25 * Math.sin(x * 0.31 + z * 0.21) + 0.25 * Math.cos(x * 0.62 - z * 0.32);
       shade.copy(grass).lerp(moss, grain * 0.61).lerp(sunlit, Math.min(elevation * 0.095, 0.55));
@@ -37,6 +37,48 @@ export function createIslandRelief() {
   geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
   geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
   geometry.setAttribute("uv", new Float32BufferAttribute(uv, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+export function createIslandShore() {
+  const geometry = new BufferGeometry();
+  const positions: number[] = [];
+  const colors: number[] = [];
+  const indices: number[] = [];
+  const dune = new Color("#a9a472");
+  const drySand = new Color("#dbc18b");
+  const wetSand = new Color("#8f8469");
+  const rock = new Color("#777d71");
+  const tint = new Color();
+
+  for (let segment = 0; segment < radialSegments; segment++) {
+    const angle = segment / radialSegments * Math.PI * 2;
+    const sandiness = 0.5 + 0.5 * Math.cos(angle * 3 - 0.6);
+    const shelf = 0.006 * Math.sin(angle * 9 + 1) - sandiness * 0.022;
+    const sections = [
+      { radius: islandLandRadius - 0.011, y: 0.082, color: dune },
+      { radius: islandLandRadius + 0.003 + shelf * 0.23, y: 0.074, color: drySand },
+      { radius: 0.985 + shelf * 0.32, y: -0.75 + sandiness * 0.52, color: drySand },
+      { radius: 1, y: -1.58, color: wetSand },
+      { radius: 1.027, y: -2.17, color: rock },
+    ];
+    sections.forEach(({ radius, y, color }, section) => {
+      const { x, z } = islandCoastPoint(angle, radius);
+      tint.copy(color).lerp(rock, (1 - sandiness) * 0.54)
+        .multiplyScalar(0.91 + 0.06 * Math.sin(angle * 31 + section) + 0.04 * Math.sin(angle * 63 - section));
+      positions.push(x, y, z);
+      colors.push(tint.r, tint.g, tint.b);
+      if (section === 0) return;
+      const vertex = segment * sections.length + section;
+      const next = (segment + 1) % radialSegments * sections.length + section;
+      indices.push(vertex - 1, next - 1, vertex, next - 1, next, vertex);
+    });
+  }
+
+  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
   return geometry;

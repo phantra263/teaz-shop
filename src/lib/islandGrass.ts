@@ -3,7 +3,7 @@ import {
   ShaderMaterial, UniformsLib, UniformsUtils, Vector2, type Vector3,
 } from "three";
 import { islandWindShader } from "./islandWind";
-import { islandElevation, islandGround, islandPond, pondBankDistance } from "./islandTerrain";
+import { islandBounds, islandCoastRatio, islandElevation, islandLandRadius, islandPond, pondBankDistance } from "./islandTerrain";
 import type { FlowerPatch } from "./islandForestFloor";
 
 const tileSize = 8;
@@ -124,14 +124,14 @@ export function createIslandGrass(
     return seed / 4294967296;
   };
 
-  for (let minZ = -islandGround.z; minZ < islandGround.z; minZ += tileSize) {
-    for (let minX = -islandGround.x; minX < islandGround.x; minX += tileSize) {
+  for (let minZ = -islandBounds.z; minZ < islandBounds.z; minZ += tileSize) {
+    for (let minX = -islandBounds.x; minX < islandBounds.x; minX += tileSize) {
       const x = minX + tileSize * 0.5;
       const z = minZ + tileSize * 0.5;
       const insideTile = (px: number, pz: number, margin: number) => Math.abs(px - x) <= tileSize * 0.5 + margin && Math.abs(pz - z) <= tileSize * 0.5 + margin;
       const nearestX = Math.max(0, Math.abs(x) - tileSize * 0.5);
       const nearestZ = Math.max(0, Math.abs(z) - tileSize * 0.5);
-      if (Math.hypot(nearestX / islandGround.x, nearestZ / islandGround.z) >= 1) continue;
+      if (Math.hypot(nearestX / islandBounds.x, nearestZ / islandBounds.z) >= 1) continue;
       const paths = pathPoints.filter((point) => insideTile(point.x, point.z, 0.75));
       const tea = beds.filter((point) => insideTile(point.x, point.z, 0.45));
       const localClearings = clearings.filter(([cx, cz, width, depth]) => insideTile(cx, cz, Math.max(width, depth)));
@@ -148,8 +148,7 @@ export function createIslandGrass(
         for (let index = 0; index < tileCells ** 2; index++) {
           const px = minX + (index % tileCells + random()) * tileSize / tileCells;
           const pz = minZ + (Math.floor(index / tileCells) + random()) * tileSize / tileCells;
-          const coast = Math.hypot(px / (islandGround.x - 0.37), pz / (islandGround.z - 0.32));
-          if (coast >= 1) continue;
+          if (islandCoastRatio(px, pz) >= islandLandRadius - 0.014) continue;
           if (Math.abs(px - islandPond.x) < 4.65 && Math.abs(pz - islandPond.z) < 4.65 && pondBankDistance(px, pz) < 0.25) continue;
           if (localClearings.some(([cx, cz, width, depth]) => Math.abs(px - cx) < width && Math.abs(pz - cz) < depth)) continue;
           if (paths.some((point) => (point.x - px) ** 2 + (point.z - pz) ** 2 < 0.38)) continue;

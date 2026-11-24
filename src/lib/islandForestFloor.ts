@@ -2,7 +2,7 @@ import {
   BufferGeometry, CanvasTexture, Color, DoubleSide, Float32BufferAttribute, InstancedMesh,
   MeshStandardMaterial, Object3D, SRGBColorSpace, Vector3,
 } from "three";
-import { islandElevation, islandGround, pondBankDistance } from "./islandTerrain";
+import { islandCoastRatio, islandElevation, islandGround, islandLandRadius, pondBankDistance } from "./islandTerrain";
 
 export function createMeadowTexture(trees: readonly (readonly [number, number])[]) {
   const canvas = document.createElement("canvas");
@@ -108,7 +108,7 @@ export function createWoodlandFlowers(
       const reach = radius * Math.sqrt((flower + 0.5) / seedlings) * (0.92 + Math.sin(flower * 1.9 + index) * 0.19);
       const px = x + Math.cos(angle) * reach;
       const pz = z + Math.sin(angle) * reach;
-      if (Math.hypot(px / (islandGround.x - 0.4), pz / (islandGround.z - 0.3)) >= 1 || pondBankDistance(px, pz) < 0.33) continue;
+      if (islandCoastRatio(px, pz) >= islandLandRadius - 0.015 || pondBankDistance(px, pz) < 0.33) continue;
       if (path.some(({ x: tx, z: tz }) => (tx - px) ** 2 + (tz - pz) ** 2 < 0.43) || beds.some(({ x: tx, z: tz }) => (tx - px) ** 2 + (tz - pz) ** 2 < 0.14)) continue;
       if (clearings.some(([cx, cz, width, depth]) => Math.abs(px - cx) < width && Math.abs(pz - cz) < depth)) continue;
       transform.position.set(px, 0.093 + islandElevation(px, pz), pz);
@@ -184,7 +184,7 @@ export function createWoodlandFerns(trees: readonly (readonly [number, number])[
       const angle = index * 2.39996 + frond * 2.08;
       const px = x + Math.cos(angle) * (0.76 + frond * 0.27);
       const pz = z + Math.sin(angle) * (0.76 + frond * 0.27);
-      if (Math.hypot(px / (islandGround.x - 0.7), pz / (islandGround.z - 0.6)) >= 1 || pondBankDistance(px, pz) < 0.45 || path.some(({ x: tx, z: tz }) => (tx - px) ** 2 + (tz - pz) ** 2 < 0.81)) continue;
+      if (islandCoastRatio(px, pz) >= islandLandRadius - 0.024 || pondBankDistance(px, pz) < 0.45 || path.some(({ x: tx, z: tz }) => (tx - px) ** 2 + (tz - pz) ** 2 < 0.81)) continue;
       transform.position.set(px, 0.093 + islandElevation(px, pz), pz);
       transform.rotation.y = angle;
       transform.scale.setScalar(0.48 + (1 + Math.sin(index * 0.61 + frond)) * 0.23);

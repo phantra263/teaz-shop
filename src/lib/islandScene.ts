@@ -13,9 +13,9 @@ import { createMeadowTexture, createWoodlandFerns, createWoodlandFlowers, type F
 import { createIslandGrass } from "./islandGrass";
 import { createIslandLeaves, type FoliageCluster } from "./islandLeaves";
 import { createIslandNavigation, type IslandObstacle } from "./islandNavigation";
-import { createIslandRelief, createIslandTrail } from "./islandRelief";
+import { createIslandRelief, createIslandShore, createIslandTrail } from "./islandRelief";
 import { createIslandStone, createIslandStoneMaterial } from "./islandStone";
-import { islandElevation, islandGround, islandLayoutScale, islandPond, pondRadiusAt } from "./islandTerrain";
+import { islandCoastPoint, islandCoastRatio, islandElevation, islandGround, islandLandRadius, islandLayoutScale, islandPond, pondRadiusAt } from "./islandTerrain";
 import { createIslandSky } from "./islandSky";
 import { createIslandWater } from "./islandWater";
 import { createIslandWildlife } from "./islandWildlife";
@@ -118,10 +118,8 @@ export function mountIslandScene(
   scene.add(sky.dome, sky.cliffs);
   const wildlife = createIslandWildlife(scene);
   const navigation = createIslandNavigation();
-  const bank = solid(round, "#8c7862", scene, 0, -0.7, 0);
-  bank.scale.set(islandGround.x + 0.4, 1.38, islandGround.z + 0.5);
-  const sand = solid(round, "#eed59b", scene, 0, -0.14, 0);
-  sand.scale.set(islandGround.x + 0.85, 0.4, islandGround.z + 0.85);
+  const shore = solid(createIslandShore(), "#fffdf9", scene, 0, 0, 0);
+  shore.material.vertexColors = true;
   const meadowShape = createIslandRelief();
   const meadow = solid(meadowShape, "#ffffff", scene, 0, 0, 0);
   meadow.material.vertexColors = true;
@@ -130,7 +128,7 @@ export function mountIslandScene(
   const pathPoints: Vector3[] = [];
   const mapPaths: Vector3[][] = [];
   const pierStart = islandStops[0].z + 0.15;
-  const pierEnd = islandGround.z + 1.7;
+  const pierEnd = islandCoastPoint(Math.PI / 2).z + 1.7;
   const grassClearings: [number, number, number, number][] = [
     [0, (pierStart + pierEnd) / 2, 1.27, (pierEnd - pierStart) / 2],
   ];
@@ -160,7 +158,12 @@ export function mountIslandScene(
     mapContext.fillStyle = "#23474a";
     mapContext.fillRect(0, 0, 100, 100);
     mapContext.beginPath();
-    mapContext.ellipse(50, 50, 45, 41, 0, 0, Math.PI * 2);
+    for (let index = 0; index < 128; index++) {
+      const { x, z } = islandCoastPoint(index * Math.PI * 2 / 128);
+      if (index === 0) mapContext.moveTo(mapX(x), mapY(z));
+      else mapContext.lineTo(mapX(x), mapY(z));
+    }
+    mapContext.closePath();
     mapContext.fillStyle = "#6b8d61";
     mapContext.strokeStyle = "#d8bb83";
     mapContext.lineWidth = 1.8;
@@ -262,7 +265,8 @@ export function mountIslandScene(
     [10.8, -2.3], [10.7, 1.1], [10.5, 3.5], [8.8, 5.9], [4.7, 7.15], [-3.6, 7.15], [-7.8, 5.3], [0.7, -3.2], [-3.1, 4.4], [4.1, 3.8],
     [-16.9, -3.9], [-15.4, -6.3], [-12.7, -7.4], [-16.8, -0.9], [-15.6, 2.5], [-13.8, 6.3], [-6.8, 9.7], [-2.4, 10.5],
     [3.5, 10.4], [9.2, 9], [13.7, 6.3], [14.4, 3.5], [18.1, 0.3], [14.3, -7.6], [10.4, -8.9], [5.1, -10.3], [0.7, -10.4],
-  ].map(([x, z]) => [x * islandLayoutScale, z * islandLayoutScale] as const);
+  ].map(([x, z]) => [x * islandLayoutScale, z * islandLayoutScale] as const)
+    .filter(([x, z]) => islandCoastRatio(x, z) < 0.93);
   const treeColors = ["#74a052", "#83a850", "#619452", "#92b45d"];
   treeLocations.forEach(([x, z], index) => tree(x, z, 0.81 + (index % 4) * 0.14 + (z > 3 ? 0.15 : 0), treeColors[index % treeColors.length], index));
   const meadowTexture = createMeadowTexture(treeLocations);
@@ -276,6 +280,7 @@ export function mountIslandScene(
   for (const [index, [localX, localZ]] of pines.entries()) {
     const x = localX * islandLayoutScale;
     const z = localZ * islandLayoutScale;
+    if (islandCoastRatio(x, z) > 0.93) continue;
     const pine = new Group();
     pine.position.set(x, 0.08 + islandElevation(x, z), z);
     pine.scale.set(0.86 + (index % 3) * 0.12, 1.02 + (index % 4) * 0.16, 0.86 + (index % 3) * 0.12);
@@ -305,6 +310,7 @@ export function mountIslandScene(
       const angle = index * 2.4 + tuft * 2.1;
       const stemX = x + Math.cos(angle) * (0.67 + tuft * 0.22);
       const stemZ = z + Math.sin(angle) * (0.67 + tuft * 0.22);
+      if (islandCoastRatio(stemX, stemZ) >= islandLandRadius) continue;
       const elevation = islandElevation(stemX, stemZ);
       solid(foliage, "#517d47", scene, stemX, 0.17 + elevation, stemZ).scale.set(0.2, 0.15, 0.16);
       solid(foliage, petals, scene, stemX + 0.045, 0.32 + elevation, stemZ).scale.set(0.087, 0.058, 0.082);
@@ -377,9 +383,9 @@ export function mountIslandScene(
   const stoneMaterial = createIslandStoneMaterial();
   stones.forEach((geometry) => geometries.add(geometry));
 
-  function placeStone(index: number, x: number, z: number, width: number, height: number, depth: number) {
+  function placeStone(index: number, x: number, z: number, width: number, height: number, depth: number, base = 0.085 + islandElevation(x, z)) {
     const stone = new Mesh(stones[index % stones.length], stoneMaterial);
-    stone.position.set(x, 0.085 + islandElevation(x, z), z);
+    stone.position.set(x, base, z);
     stone.scale.set(width, height, depth);
     stone.rotation.y = index * 2.39996;
     if (height > 0.27) navigation.addSolid("rock", x, z, width * 1.14, depth * 1.14, stone.rotation.y);
@@ -388,17 +394,23 @@ export function mountIslandScene(
     scene.add(stone);
   }
 
-  for (let index = 0; index < 55; index++) {
+  for (let index = 0; index < 64; index++) {
     const angle = index * 2.39996;
-    const x = Math.cos(angle) * (islandGround.x + 0.16);
-    const z = Math.sin(angle) * (islandGround.z + 0.23);
+    const rocky = 0.5 - Math.cos(angle * 3 - 0.6) * 0.5;
+    if (rocky < 0.57 && index % 5 !== 0) continue;
+    const { x, z } = islandCoastPoint(angle, 0.981 + 0.013 * Math.sin(index * 1.9));
     if (z > pierStart && Math.abs(x) < 1.6) continue;
-    const size = 0.3 + (index % 5) * 0.15;
-    placeStone(index, x, z, size * 1.35, size * 0.66, size);
+    const size = 0.35 + (index % 5) * (0.10 + rocky * 0.16);
+    placeStone(index, x, z, size * 1.35, size * 0.75, size, -0.42 - Math.sin(index * 1.9) * 0.42);
+    if (rocky > 0.83 && index % 3 === 1) {
+      const outlying = islandCoastPoint(angle + 0.014, 1.035 + index % 4 * 0.008);
+      placeStone(index + 2, outlying.x, outlying.z, size * 0.92, size * 0.68, size * 0.65, -1.73);
+    }
   }
   const outcrops = [[4.2, 16.5, 2.05], [-4.7, 15.5, 1.2], [8.6, 13.3, 2.8], [-12.4, 9.8, 2.15], [-18.5, 1.9, 2.45], [-26.4, -11.8, 2.6],
     [-7.2, -15.8, 2.6], [10.1, -14.4, 2.7], [19.6, -13.1, 1.6], [22.2, 7.2, 2.1], [30.3, -2.6, 1.4], [29.3, 3.8, 1.8]];
   outcrops.forEach(([x, z, size], index) => {
+    if (islandCoastRatio(x, z) > 0.925) return;
     placeStone(index, x, z, size, size * (0.74 + index % 3 * 0.11), size * 0.69);
     placeStone(index + 2, x + size * 0.7, z + size * 0.48, size * 0.52, size * 0.4, size * 0.42);
     placeStone(index + 3, x - size * 0.88, z + size * 0.47, size * 0.37, size * 0.27, size * 0.24);
@@ -411,7 +423,7 @@ export function mountIslandScene(
     if (index % 3 === 0) for (const side of [-1, 1]) block(scene, "#675042", side * 0.94, -0.28, z, 0.17, 1.53, 0.2);
   }
   const boat = new Group();
-  boat.position.set(2.12, -1.25, islandGround.z + 1.1);
+  boat.position.set(2.12, -1.25, pierEnd - 0.6);
   boat.rotation.y = -0.24;
   scene.add(boat);
   solid(foliage, "#a25b3e", boat, 0, 0, 0).scale.set(0.66, 0.3, 1.52);
@@ -681,7 +693,7 @@ export function mountIslandScene(
   }
 
   function setDestination(x: number, z: number, stop?: IslandStopId) {
-    const edge = Math.max(1, Math.hypot(x / (islandGround.x - 0.4), z / (islandGround.z - 0.4)));
+    const edge = Math.max(1, islandCoastRatio(x, z) / (islandLandRadius - 0.018));
     const route = navigation.route(player.position, { x: x / edge, z: z / edge });
     const destination = route?.pop();
     waypoints.length = 0;
