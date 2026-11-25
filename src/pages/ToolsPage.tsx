@@ -21,7 +21,7 @@ export function ToolsPage() {
         <header className="hub-tools-toolbar">
           <Link to="/" className="hub-brand">
             <img src="/avatar.png" width="42" height="42" alt="" />
-            <span>TeaZ <strong>Review</strong></span>
+            <span>TeaZ</span>
           </Link>
           <Link className="hub-button hub-button-secondary" to="/profile">Portfolio Trà Phan</Link>
         </header>

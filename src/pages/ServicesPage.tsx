@@ -32,7 +32,7 @@ export function ServicesPage() {
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "Bảng giá gói trải nghiệm & dịch vụ | TeaZ Review";
+    document.title = "Bảng giá gói trải nghiệm & dịch vụ | TeaZ";
     if (!window.location.hash) window.scrollTo(0, 0);
     return () => { document.title = previousTitle; };
   }, []);
@@ -43,7 +43,7 @@ export function ServicesPage() {
         <header className="hub-tools-toolbar">
           <Link to="/" className="hub-brand">
             <img src="/avatar.png" width="42" height="42" alt="" />
-            <span>TeaZ <strong>Review</strong></span>
+            <span>TeaZ</span>
           </Link>
           <a className="hub-button hub-button-secondary service-contact" href={zaloUrl} target="_blank" rel="noopener noreferrer">
             <MessageCircle size={17} aria-hidden="true" /> Zalo {servicesPage.zaloPhone}

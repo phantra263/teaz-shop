@@ -23,17 +23,17 @@ export function ShopPage() {
   const { message, showToast } = useToast();
   const [contactOpen, setContactOpen] = useState(false);
   const [leavesOn, setLeavesOn] = useState(false);
-  const { motionEnabled, toggleMotion } = useShopMotion();
+  const motionEnabled = useShopMotion();
 
   useEffect(() => {
-    document.title = site.brandName;
+    document.title = site.pageTitle;
   }, []);
 
   const closeContact = useCallback(() => setContactOpen(false), []);
   const copyPageLink = useCallback(async () => {
     try {
       await copyText(window.location.href);
-      showToast("Đã sao chép link TeaZ Review.");
+      showToast("Đã sao chép link TeaZ.");
     } catch {
       showToast("Không thể sao chép. Bạn có thể lấy link trên thanh địa chỉ.");
     }
@@ -59,7 +59,7 @@ export function ShopPage() {
       <FallingLeaves enabled={motionEnabled && leavesOn} />
       <InAppBanner />
       <div className="hub-container">
-        <Toolbar onShare={() => void handleShare()} motionEnabled={motionEnabled} onToggleMotion={toggleMotion} />
+        <Toolbar onShare={() => void handleShare()} />
         <main id="noi-dung">
           <ProfileHeader />
           <ToolBanner />

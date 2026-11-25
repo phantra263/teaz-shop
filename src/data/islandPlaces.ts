@@ -46,7 +46,7 @@ export const islandPlaces: readonly IslandPlace[] = [
   {
     id: "market",
     slug: "cho-tra",
-    heading: "Sản phẩm TeaZ review",
+    heading: "Sản phẩm TeaZ giới thiệu",
     intro: "Tìm các món làm đẹp, đồ gia dụng, thời trang và phụ kiện công nghệ đã được TeaZ giới thiệu.",
     preview: products.map(({ categoryLabel }) => categoryLabel),
     entries: products.map(({ name, description }) => ({ title: name, description })),
@@ -58,7 +58,7 @@ export const islandPlaces: readonly IslandPlace[] = [
   {
     id: "house",
     slug: "nha-teaz",
-    heading: "Trà Phan và TeaZ Review",
+    heading: "Trà Phan và TeaZ",
     intro: aboutParagraphs[0],
     preview: ["Portfolio Trà Phan", "Kênh TeaZ Code"],
     entries: [

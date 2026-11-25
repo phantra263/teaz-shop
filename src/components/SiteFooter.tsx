@@ -9,7 +9,7 @@ interface SiteFooterProps {
 export function SiteFooter({ onCopyLink, leavesOn, onToggleLeaves }: SiteFooterProps) {
   return (
     <footer className="hub-footer">
-      <p>© {new Date().getFullYear()} TeaZ Review</p>
+      <p>© {new Date().getFullYear()} TeaZ</p>
       <nav aria-label="Cuối trang">
         <a href="#affiliate">Tiếp thị liên kết</a>
         <a href="#cau-hoi">Câu hỏi</a>

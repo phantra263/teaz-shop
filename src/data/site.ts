@@ -10,7 +10,7 @@
 export interface Product {
   id: number;
   name: string;
-  category: "beauty" | "home" | "fashion" | "tech";
+  category: "beauty" | "home";
   categoryLabel: string;
   description: string;
   icon: string;
@@ -23,22 +23,21 @@ export const SITE_URL = (
 ).replace(/\/$/, "");
 
 export const site = {
-  brandName: "TeaZ Review | Review sản phẩm, Shopee & TikTok Shop",
+  brandName: "TeaZ",
+  pageTitle: "TeaZ | Review sản phẩm, Shopee & TikTok Shop",
   handle: "@teaz_shop",
   shopeeCollectionUrl: "https://collshp.com/phancongtra",
   tiktokProfileUrl: "https://www.tiktok.com/@teaz_shop",
   youtubeChannelUrl: "https://www.youtube.com/@traz6298",
   facebookPageUrl: "https://www.facebook.com/teaz.code",
   bookingEmail: "phantra2212@gmail.com",
-  shareText: "Review sản phẩm, bộ sưu tập Shopee và các kênh của TeaZ Review.",
+  shareText: "Review sản phẩm, bộ sưu tập Shopee và các kênh của TeaZ.",
 } as const;
 
 export const categories = [
   { id: "all", label: "Tất cả" },
   { id: "beauty", label: "✨ Làm đẹp" },
   { id: "home", label: "🍳 Gia dụng" },
-  { id: "fashion", label: "👕 Thời trang" },
-  { id: "tech", label: "⚡ Công nghệ" },
 ] as const;
 
 export type CategoryId = (typeof categories)[number]["id"];
@@ -62,28 +61,10 @@ export const products: Product[] = [
       "Chống dính gốm an toàn, tháo cán xếp gọn tiết kiệm 70% diện tích bếp.",
     icon: "🍳",
   },
-  {
-    id: 3,
-    name: "Áo Thun Nam Cổ Trụ / Polo Tối Giản",
-    category: "fashion",
-    categoryLabel: "Thời trang",
-    description:
-      "Chất vải thoáng mát, co giãn nhẹ, form đứng dáng dễ phối đi làm & đi chơi.",
-    icon: "👕",
-  },
-  {
-    id: 4,
-    name: "Phụ Kiện Setup Bàn Làm Việc & Cáp Sạc Nhanh",
-    category: "tech",
-    categoryLabel: "Công nghệ",
-    description:
-      "Cáp truyền dữ liệu tốc độ cao & phụ kiện gọn góc làm việc đa thiết bị.",
-    icon: "⚡",
-  },
 ];
 
 export const aboutParagraphs = [
-  "Mình là Trà Phan, người làm nội dung tại TeaZ Review. Mình chia sẻ góc nhìn về đồ làm đẹp, gia dụng, thời trang và công nghệ để bạn cân nhắc món nào hợp với nhu cầu của mình.",
+  "Mình là Trà Phan, người làm nội dung tại TeaZ. Mình chia sẻ góc nhìn về đồ làm đẹp, gia dụng, thời trang và công nghệ để bạn cân nhắc món nào hợp với nhu cầu của mình.",
   "Bạn có thể xem nội dung trên TikTok và YouTube, tìm sản phẩm trong bộ sưu tập Shopee hoặc theo dõi những chia sẻ về công nghệ trên Facebook TeaZ Code.",
 ];
 

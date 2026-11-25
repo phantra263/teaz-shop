@@ -31,7 +31,7 @@ function Save-TeaZImage {
     $brand = New-Object System.Drawing.Font $family, 86, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
     $sub = New-Object System.Drawing.Font $family, 34, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
     $handle = New-Object System.Drawing.Font $family, 28, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
-    $graphics.DrawString("TeaZ Review", $brand, $white, 78, 175)
+    $graphics.DrawString("TeaZ", $brand, $white, 78, 175)
     $graphics.DrawString("Săn deal chuẩn  ·  Review có tâm", $sub, $white, 82, 290)
     $graphics.DrawString("@teaz_shop", $handle, $white, 82, 360)
     $brand.Dispose()

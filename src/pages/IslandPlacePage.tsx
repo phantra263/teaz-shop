@@ -34,7 +34,7 @@ export default function IslandPlacePage() {
         <Link to="/dao-tra" state={place ? { islandStop: place.id } : undefined} className="island-ui-button">
           <ArrowLeft size={17} aria-hidden="true" /> Về Đảo Trà
         </Link>
-        <Link className="island-brand" to="/"><img src="/avatar.png" width="32" height="32" alt="" /><span>TeaZ Review</span></Link>
+        <Link className="island-brand" to="/"><img src="/avatar.png" width="32" height="32" alt="" /><span>TeaZ</span></Link>
       </header>
       <main className="island-place-main">
         <section className="island-place-hero" aria-labelledby="island-place-title">

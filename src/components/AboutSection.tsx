@@ -5,7 +5,7 @@ export function AboutSection() {
   return (
     <section className="hub-section hub-about" id="ve-teaz" aria-labelledby="ve-teaz-heading">
       <div>
-        <h2 className="hub-heading" id="ve-teaz-heading">Về TeaZ Review</h2>
+        <h2 className="hub-heading" id="ve-teaz-heading">Về TeaZ</h2>
         {aboutParagraphs.map((paragraph) => (
           <p className="hub-description" key={paragraph}>{paragraph}</p>
         ))}

@@ -56,7 +56,7 @@ export default function IslandPage() {
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "Đảo Trà | TeaZ Review";
+    document.title = "Đảo Trà | TeaZ";
     window.scrollTo(0, 0);
     const host = viewport.current;
     const surface = canvas.current;
@@ -129,7 +129,7 @@ export default function IslandPage() {
         <Link className="island-brand" to="/">
           <ArrowLeft size={17} aria-hidden="true" />
           <img src="/avatar.png" width="32" height="32" alt="" />
-          <span>TeaZ Review</span>
+          <span>TeaZ</span>
         </Link>
         <a href="#dia-diem" className="island-ui-button"><MapPin size={17} aria-hidden="true" /> Địa điểm</a>
       </header>

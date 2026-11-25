@@ -120,7 +120,7 @@ export function ProfilePage() {
           <div className="relative z-10 order-1 mb-8 h-[305px] w-[305px] xl:order-none xl:mb-0 xl:h-[506px] xl:w-[506px]">
             <motion.img
               src="/avatar.png"
-              alt="TeaZ Review & Tech"
+              alt="TeaZ"
               className="absolute inset-0 m-auto h-[298px] w-[298px] rounded-full object-cover xl:h-[498px] xl:w-[498px]"
               initial={reduceMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -180,12 +180,12 @@ export function ProfilePage() {
           </div>
         </section>
         <section className="mx-auto max-w-4xl rounded-3xl border border-white/15 bg-[#22262b] p-5 sm:p-8" aria-labelledby="creator-project-title">
-          <h2 id="creator-project-title" className="text-2xl font-semibold text-white">Dự án TeaZ Review</h2>
+          <h2 id="creator-project-title" className="text-2xl font-semibold text-white">Dự án TeaZ</h2>
           <p className="mt-3 max-w-2xl leading-relaxed text-white/75">
             Website mình xây dựng để kết nối nội dung review trên TikTok, YouTube và Facebook với danh mục sản phẩm và bộ sưu tập Shopee.
           </p>
           <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3">
-            <Link className="text-[#00ff99] underline underline-offset-4 hover:text-white" to="/">Xem TeaZ Review</Link>
+            <Link className="text-[#00ff99] underline underline-offset-4 hover:text-white" to="/">Xem TeaZ</Link>
             <a className="text-[#00ff99] underline underline-offset-4 hover:text-white" href="/#hop-tac">Hợp tác nội dung</a>
           </div>
         </section>

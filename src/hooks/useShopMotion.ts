@@ -5,7 +5,7 @@ const reduceQuery = "(prefers-reduced-motion: reduce)";
 
 export function useShopMotion() {
   const [reduced, setReduced] = useState(() => window.matchMedia(reduceQuery).matches);
-  const [preference, setPreference] = useState<boolean | null>(() => {
+  const [preference] = useState<boolean | null>(() => {
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved === "on") return true;
@@ -23,17 +23,5 @@ export function useShopMotion() {
     return () => query.removeEventListener("change", update);
   }, []);
 
-  const motionEnabled = preference ?? !reduced;
-
-  function toggleMotion() {
-    const next = !motionEnabled;
-    setPreference(next);
-    try {
-      localStorage.setItem(storageKey, next ? "on" : "off");
-    } catch {
-      // The toggle still works for this visit when storage is unavailable.
-    }
-  }
-
-  return { motionEnabled, toggleMotion };
+  return preference ?? !reduced;
 }
