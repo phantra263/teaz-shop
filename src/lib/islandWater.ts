@@ -23,34 +23,55 @@ function createCoastProfile() {
   return texture;
 }
 
+function createNoiseField(columns: number, rows: number) {
+  const values = Float32Array.from({ length: columns * rows }, () => Math.random() * 2 - 1);
+  return (u: number, v: number) => {
+    const x = u * columns;
+    const z = v * rows;
+    const ix = Math.floor(x);
+    const iz = Math.floor(z);
+    const fx = x - ix;
+    const fz = z - iz;
+    const blendX = fx * fx * (3 - 2 * fx);
+    const blendZ = fz * fz * (3 - 2 * fz);
+    const a = iz * columns;
+    const b = (iz + 1) % rows * columns;
+    const next = (ix + 1) % columns;
+    const front = values[a + ix] * (1 - blendX) + values[a + next] * blendX;
+    const back = values[b + ix] * (1 - blendX) + values[b + next] * blendX;
+    return front * (1 - blendZ) + back * blendZ;
+  };
+}
+
 function createRippleTexture() {
-  const size = 128;
-  const data = new Uint8Array(size * size * 4);
-  const waves = [
-    [3, 8, 0.4, 0.18], [8, 11, 2.2, 0.17], [-6, 7, 4.1, 0.16],
-    [12, 15, 1.3, 0.12], [-8, 13, 3.4, 0.11], [11, 19, 5.3, 0.09],
-    [-9, 21, 2.6, 0.07], [12, 25, 0.8, 0.06], [15, -8, 4.5, 0.10],
-  ].map(([x, z, phase, amplitude]) => {
-    const length = Math.hypot(x, z);
-    return { x, z, phase, amplitude, dx: amplitude * x / length, dz: amplitude * z / length };
-  });
+  const size = 256;
+  const height = new Float32Array(size * size);
+  const data = new Uint8Array(height.length * 4);
+  const ridges = createNoiseField(19, 46);
+  const windChop = createNoiseField(47, 88);
+  const gusts = createNoiseField(13, 11);
+  const encode = (value: number) => Math.round(127.5 * (1 + Math.max(-1, Math.min(1, value))));
+
   for (let z = 0; z < size; z++) {
     for (let x = 0; x < size; x++) {
-      let slopeX = 0;
-      let slopeZ = 0;
-      let height = 0;
-      for (const wave of waves) {
-        const phase = (wave.x * x + wave.z * z) * 2 * Math.PI / size + wave.phase;
-        const slope = Math.cos(phase);
-        slopeX += slope * wave.dx;
-        slopeZ += slope * wave.dz;
-        height += Math.sin(phase) * wave.amplitude;
-      }
-      const offset = (z * size + x) * 4;
-      data[offset] = Math.round(127.5 * (1 + slopeX));
-      data[offset + 1] = Math.round(127.5 * (1 + slopeZ));
-      data[offset + 2] = Math.round(127.5 * (1 + Math.max(-1, Math.min(1, height))));
-      data[offset + 3] = 255;
+      const u = x / size;
+      const v = z / size;
+      height[z * size + x] = ridges(u, v) * 0.67 + windChop(u, v) * 0.33;
+    }
+  }
+  // Store uneven surface slopes, elevation, and a broad wind field in one mipmapped texture.
+  for (let z = 0; z < size; z++) {
+    const above = (z + size - 1) % size * size;
+    const below = (z + 1) % size * size;
+    for (let x = 0; x < size; x++) {
+      const index = z * size + x;
+      const row = z * size;
+      const slopeX = height[row + (x + 1) % size] - height[row + (x + size - 1) % size];
+      const slopeZ = height[below + x] - height[above + x];
+      data[index * 4] = encode(slopeX * 3.1);
+      data[index * 4 + 1] = encode(slopeZ * 2.1);
+      data[index * 4 + 2] = encode(height[index]);
+      data[index * 4 + 3] = encode(gusts(x / size, z / size));
     }
   }
   const texture = new DataTexture(data, size, size);
@@ -146,11 +167,13 @@ export function createIslandWater() {
         float coastSlope = dot(profile.ba, unpack) * 4.0 - 2.0;
         vec2 coastGradient = (direction - tangent * coastSlope / radius) / coast;
         float shore = (radius - coastRadius) / max(length(coastGradient), 0.0001);
-        vec2 drift = sin(vec2(p.x + p.y * 0.41, p.y - p.x * 0.72) * 0.18 + time * 0.09);
-        vec3 swell = texture2D(ripples, p * 0.048 + drift * 0.037 + time * vec2(0.009, -0.014)).rgb * 2.0 - 1.0;
+        vec4 field = texture2D(ripples, p * 0.0042 + time * vec2(0.0008, -0.0011)) * 2.0 - 1.0;
+        vec2 shift = vec2(field.a, field.b) * 0.068;
+        float wind = smoothstep(-0.48, 0.62, field.a);
+        vec3 swell = texture2D(ripples, p * 0.036 + shift + time * vec2(0.006, -0.013)).rgb * 2.0 - 1.0;
         mat2 rotation = mat2(0.57, 0.82, -0.82, 0.57);
-        vec3 chop = texture2D(ripples, rotation * p * 0.105 + vec2(0.38, 0.27) + swell.rg * 0.017 - time * vec2(0.019, 0.012)).rgb * 2.0 - 1.0;
-        vec2 slope = swell.rg * 0.24 + chop.rg * rotation * 0.18;
+        vec3 chop = texture2D(ripples, rotation * p * 0.076 - shift.yx + vec2(0.38, 0.27) + swell.rg * 0.009 - time * vec2(0.018, 0.013)).rgb * 2.0 - 1.0;
+        vec2 slope = swell.rg * 0.16 + chop.rg * rotation * mix(0.045, 0.12, wind);
         vec3 normal = normalize(vec3(-slope.x, 1.0, -slope.y));
         vec3 sight = normalize(waterView);
         float angleToSurface = 1.0 - clamp(dot(normal, sight), 0.0, 1.0);
@@ -161,15 +184,15 @@ export function createIslandWater() {
         vec3 color = mix(deepColor, shallowsColor, shelf);
         color = mix(color, sandColor, sand * 0.76);
         float lightThroughWater = (1.0 - smoothstep(0.025, 0.155, abs(swell.b + chop.b * 0.46))) * sand;
-        color *= 1.0 + swell.b * 0.22 + chop.b * 0.14 + lightThroughWater * 0.23;
+        color *= 1.0 + field.a * 0.075 + swell.b * 0.16 + chop.b * 0.09 + lightThroughWater * 0.20;
 
         vec3 reflected = reflect(-sight, normal);
         float skyLight = smoothstep(-0.12, 0.57, reflected.y + swell.b * 0.16);
         color = mix(color, vec3(0.33, 0.53, 0.70), (0.10 + skyLight * 0.44) * fresnel);
         vec3 halfVector = normalize(sight + sunDirection + vec3(0.0, 0.0001, 0.0));
         float sparkle = pow(max(0.0, dot(normal, halfVector)), 94.0);
-        color = mix(color, vec3(0.90, 0.92, 0.84), sparkle * (0.09 + 0.36 * smoothstep(0.11, 0.52, chop.b)));
-        color += vec3(0.06, 0.12, 0.14) * smoothstep(0.32, 0.69, swell.b + chop.b * 0.83) * (0.42 + fresnel * 0.58);
+        float glint = smoothstep(-0.05, 0.65, chop.b + field.a * 0.28);
+        color = mix(color, vec3(0.90, 0.92, 0.84), sparkle * (0.07 + 0.23 * glint));
 
         if (abs(p.x) < 8.5 && p.y > pier.x - 5.0 && p.y < pier.y + 8.5 && reflected.y > 0.025) {
           vec2 origin = p + vec2(chop.r, swell.g) * 0.17;
@@ -181,8 +204,8 @@ export function createIslandWater() {
           color = mix(color, vec3(0.19, 0.10, 0.058), vessel * strength);
         }
 
-        float lace = smoothstep(0.05, 0.51, swell.b + chop.b * 0.67);
-        float wash = shore + swell.b * 0.31 + chop.b * 0.20 - 0.20 - sin(time * 0.76 + angle * 4.0) * 0.15;
+        float lace = smoothstep(-0.13, 0.5, swell.b + chop.b * 0.56 + field.a * 0.18);
+        float wash = shore + swell.b * 0.35 + chop.b * 0.18 - 0.22 + field.a * 0.18;
         float foam = (1.0 - smoothstep(0.045, 0.28, abs(wash))) * lace;
         color = mix(color, foamColor, foam * 0.58);
 
