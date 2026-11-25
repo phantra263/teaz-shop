@@ -7,8 +7,7 @@ import { islandBounds, islandCoastRatio, islandElevation, islandLandRadius, isla
 import type { FlowerPatch } from "./islandForestFloor";
 
 const tileSize = 8;
-const tileCells = 28;
-const layers = 5;
+const tileCells = 24;
 const nearDistance = 13;
 const farDistance = 34;
 
@@ -18,6 +17,7 @@ export function createIslandGrass(
   trees: readonly (readonly [number, number])[],
   beds: readonly Vector3[],
   accents: readonly FlowerPatch[],
+  layers: number,
 ) {
   const geometry = new BufferGeometry();
   const positions: number[] = [];
@@ -189,15 +189,19 @@ export function createIslandGrass(
 
   return {
     mesh: field,
-    update(time: number, position: Vector3, animated: boolean, camera: Vector3) {
+    update(time: number, position: Vector3, animated: boolean, camera: Vector3, layerLimit: number) {
       material.uniforms.time.value = time;
       material.uniforms.wind.value = animated ? 1 : 0;
       material.uniforms.traveler.value.set(position.x, position.z);
       for (const { x, z, mesh, ends } of tiles) {
+        if (layerLimit === 1) {
+          mesh.count = ends[0];
+          continue;
+        }
         const distance = Math.hypot(Math.max(0, Math.abs(x - camera.x) - tileSize * 0.5), Math.max(0, Math.abs(z - camera.z) - tileSize * 0.5));
         const t = Math.max(0, Math.min(1, (distance - nearDistance) / (farDistance - nearDistance)));
         const visibleLayers = 1 + (layers - 1) * (1 - t * t * (3 - 2 * t));
-        mesh.count = ends[Math.ceil(visibleLayers) - 1];
+        mesh.count = ends[Math.min(layerLimit, Math.ceil(visibleLayers)) - 1];
       }
     },
     dispose() {

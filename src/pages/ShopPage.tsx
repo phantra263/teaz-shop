@@ -61,7 +61,7 @@ export function ShopPage() {
       <div className="hub-container">
         <Toolbar onShare={() => void handleShare()} motionEnabled={motionEnabled} onToggleMotion={toggleMotion} />
         <main id="noi-dung">
-          <ProfileHeader motionEnabled={motionEnabled} />
+          <ProfileHeader />
           <ToolBanner />
           <LinkCards />
           <ProductList />

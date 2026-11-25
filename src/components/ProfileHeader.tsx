@@ -1,8 +1,7 @@
 import { Play, ShoppingBag } from "lucide-react";
 import { site } from "../data/site";
-import { HeroScene } from "./HeroScene";
 
-export function ProfileHeader({ motionEnabled }: { motionEnabled: boolean }) {
+export function ProfileHeader() {
   return (
     <section className="hub-hero" aria-labelledby="hero-title">
       <div className="hub-hero-copy">
@@ -30,7 +29,6 @@ export function ProfileHeader({ motionEnabled }: { motionEnabled: boolean }) {
           fetchPriority="high"
           alt=""
         />
-        {motionEnabled && <HeroScene />}
       </div>
     </section>
   );

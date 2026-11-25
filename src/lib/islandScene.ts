@@ -42,11 +42,14 @@ export function mountIslandScene(
     initialStop: IslandStopId;
   },
 ) {
-  const gl = canvas.getContext("webgl2", { antialias: true, alpha: false, powerPreference: "low-power" });
+  const mobile = window.matchMedia("(pointer: coarse)").matches;
+  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+  let lightQuality = mobile || navigator.hardwareConcurrency <= 4 || (memory !== undefined && memory <= 4);
+  const grassLayers = lightQuality ? 2 : 3;
+  const gl = canvas.getContext("webgl2", { antialias: !lightQuality, alpha: false });
   if (!gl) return;
 
-  const renderer = new WebGLRenderer({ canvas, context: gl, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  const renderer = new WebGLRenderer({ canvas, context: gl });
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = PCFShadowMap;
   renderer.shadowMap.autoUpdate = false;
@@ -72,7 +75,7 @@ export function mountIslandScene(
   const sun = new DirectionalLight("#fff2cc", 2.62);
   sun.position.set(-34, 53, 37);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.setScalar(lightQuality ? 1024 : 2048);
   sun.shadow.radius = 2.1;
   sun.shadow.bias = -0.00024;
   sun.shadow.normalBias = 0.065;
@@ -509,7 +512,7 @@ export function mountIslandScene(
   player.rotation.y = Math.PI;
   player.scale.setScalar(1.12);
   scene.add(player);
-  const grass = createIslandGrass(pathPoints, grassClearings, treeLocations, teaBeds, flowerPatches);
+  const grass = createIslandGrass(pathPoints, grassClearings, treeLocations, teaBeds, flowerPatches, grassLayers);
   const flowers = createWoodlandFlowers(treeLocations, flowerPatches, pathPoints, teaBeds, grassClearings);
   scene.add(grass.mesh, flowers.mesh);
   const traveler = new Group();
@@ -649,6 +652,10 @@ export function mountIslandScene(
   let nearbyStop: IslandStopId | null = null;
   let pointerStart: { id: number; x: number; y: number } | undefined;
   let frameBefore = 0;
+  let nextFrame = 0;
+  let sampleTime = 0;
+  let sampleFrames = 0;
+  let slowSamples = 0;
   let weatherTime = 0;
   let width = 1;
   let height = 1;
@@ -741,6 +748,11 @@ export function mountIslandScene(
   }
   function keyUp(event: KeyboardEvent) { keys.delete(event.key.toLowerCase()); }
 
+  function resizeBuffer() {
+    const pixelBudget = lightQuality ? 650_000 : 1_200_000;
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, lightQuality ? 0.9 : 1.25, Math.sqrt(pixelBudget / (width * height)));
+    renderer.setDrawingBufferSize(width, height, pixelRatio);
+  }
   const resize = () => {
     width = Math.max(1, host.clientWidth);
     height = Math.max(1, host.clientHeight);
@@ -754,16 +766,32 @@ export function mountIslandScene(
     explorer.aspect = aspect;
     explorer.fov = aspect < 0.9 ? 66 : 54;
     explorer.updateProjectionMatrix();
-    renderer.setSize(width, height, false);
+    resizeBuffer();
   };
   const sizeObserver = new ResizeObserver(resize);
   sizeObserver.observe(host);
   resize();
 
   function draw(frame: number) {
+    const targetInterval = lightQuality || !closeView || !animateWeather ? 1000 / 30 : 1000 / 60;
+    if (frame + 1 < nextFrame) return;
+    nextFrame = Math.max(frame, nextFrame + targetInterval);
     const frameTime = frameBefore ? (frame - frameBefore) / 1000 : 0;
     const delta = Math.min(frameTime, 0.085);
     frameBefore = frame;
+    if (!lightQuality && frameTime > 0 && frameTime < 0.25) {
+      sampleTime += frameTime;
+      sampleFrames++;
+      if (sampleTime >= 1.5) {
+        slowSamples = sampleFrames / sampleTime < 24 ? slowSamples + 1 : 0;
+        sampleTime = 0;
+        sampleFrames = 0;
+        if (slowSamples >= 2) {
+          lightQuality = true;
+          resizeBuffer();
+        }
+      }
+    }
     orbit.update();
     movement.set(0, 0, 0);
 
@@ -902,7 +930,8 @@ export function mountIslandScene(
       active: closeView ? wildlife.activeAction : null,
       nearby: closeView && !isWalking && !hasGoal ? wildlife.nearbyActions(player.position) : [],
     });
-    grass.update(weatherTime, player.position, animateWeather, camera.position);
+    const layerLimit = closeView ? Math.min(grassLayers, lightQuality ? 2 : 3) : 1;
+    grass.update(weatherTime, player.position, animateWeather, camera.position, layerLimit);
     leaves.update(weatherTime, animateWeather);
     if (closeView) sky.dome.position.copy(camera.position);
     renderer.render(scene, camera);
@@ -925,13 +954,23 @@ export function mountIslandScene(
     }
   }
 
-  const viewObserver = new IntersectionObserver(([entry]) => {
-    viewVisible = entry.isIntersecting;
+  let inViewport = false;
+  function syncAnimation() {
+    viewVisible = inViewport && !document.hidden;
     frameBefore = 0;
-    renderer.setAnimationLoop(entry.isIntersecting ? draw : null);
-    if (!entry.isIntersecting) clearKeys();
+    nextFrame = 0;
+    sampleTime = 0;
+    sampleFrames = 0;
+    slowSamples = 0;
+    renderer.setAnimationLoop(viewVisible ? draw : null);
+    if (!viewVisible) clearKeys();
+  }
+  const viewObserver = new IntersectionObserver(([entry]) => {
+    inViewport = entry.isIntersecting;
+    syncAnimation();
   });
   viewObserver.observe(host);
+  document.addEventListener("visibilitychange", syncAnimation);
   canvas.addEventListener("pointerdown", pointerDown);
   canvas.addEventListener("pointerup", pointerUp);
   window.addEventListener("keydown", keyDown);
@@ -973,6 +1012,7 @@ export function mountIslandScene(
       orbit.dispose();
       sizeObserver.disconnect();
       viewObserver.disconnect();
+      document.removeEventListener("visibilitychange", syncAnimation);
       window.removeEventListener("keydown", keyDown);
       window.removeEventListener("keyup", keyUp);
       window.removeEventListener("blur", clearKeys);

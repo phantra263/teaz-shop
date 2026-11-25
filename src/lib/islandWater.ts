@@ -1,22 +1,41 @@
-import { Color, Mesh, PlaneGeometry, ShaderMaterial, UniformsLib, UniformsUtils, Vector2, Vector4 } from "three";
-import { islandCoastBase, islandCoastDirections, islandGround } from "./islandTerrain";
+import { Color, DataTexture, LinearFilter, Mesh, PlaneGeometry, RepeatWrapping, ShaderMaterial, UniformsLib, UniformsUtils, Vector2 } from "three";
+import { islandCoastRadius, islandGround } from "./islandTerrain";
+
+const coastSamples = 512;
+
+function createCoastProfile() {
+  const step = Math.PI * 2 / coastSamples;
+  const radii = Array.from({ length: coastSamples }, (_, i) => islandCoastRadius(Math.cos(i * step), Math.sin(i * step)));
+  const data = new Uint8Array(coastSamples * 4);
+  for (let i = 0; i < coastSamples; i++) {
+    const slope = (radii[(i + 1) % coastSamples] - radii[(i + coastSamples - 1) % coastSamples]) / (2 * step);
+    // Pack radius [0, 2] and angular slope [-2, 2] into two bytes each.
+    const radiusBits = Math.round(radii[i] * 32767.5);
+    const slopeBits = Math.round((Math.max(-2, Math.min(2, slope)) + 2) * 16383.75);
+    data.set([radiusBits >> 8, radiusBits & 255, slopeBits >> 8, slopeBits & 255], i * 4);
+  }
+  const texture = new DataTexture(data, coastSamples, 1);
+  texture.wrapS = RepeatWrapping;
+  texture.magFilter = texture.minFilter = LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+}
 
 export function createIslandWater() {
   const geometry = new PlaneGeometry(260, 260);
+  const coastProfile = createCoastProfile();
   const material = new ShaderMaterial({
     fog: true,
-    uniforms: UniformsUtils.merge([
-      UniformsLib.fog,
-      {
-        time: { value: 0 },
-        coast: { value: new Vector2(islandGround.x, islandGround.z) },
-        coastFeatures: { value: islandCoastDirections.map(({ x, z, depth, sharpness }) => new Vector4(x, z, depth, sharpness)) },
-        deepColor: { value: new Color("#407f97") },
-        shallowColor: { value: new Color("#83c8b3") },
-        glintColor: { value: new Color("#c6e5e3") },
-        foamColor: { value: new Color("#e1f2e6") },
-      },
-    ]),
+    uniforms: {
+      ...UniformsUtils.clone(UniformsLib.fog),
+      time: { value: 0 },
+      coast: { value: new Vector2(islandGround.x, islandGround.z) },
+      coastProfile: { value: coastProfile },
+      deepColor: { value: new Color("#407f97") },
+      shallowColor: { value: new Color("#83c8b3") },
+      glintColor: { value: new Color("#c6e5e3") },
+      foamColor: { value: new Color("#e1f2e6") },
+    },
     vertexShader: /* glsl */ `
       #include <fog_pars_vertex>
       varying vec2 waterPosition;
@@ -37,7 +56,7 @@ export function createIslandWater() {
       varying vec3 waterView;
       uniform float time;
       uniform vec2 coast;
-      uniform vec4 coastFeatures[${islandCoastDirections.length}];
+      uniform sampler2D coastProfile;
       uniform vec3 deepColor;
       uniform vec3 shallowColor;
       uniform vec3 glintColor;
@@ -49,14 +68,13 @@ export function createIslandWater() {
         float radius = max(length(ellipse), 0.0001);
         vec2 direction = ellipse / radius;
         vec2 tangent = vec2(-direction.y, direction.x);
-        float coastRadius = ${islandCoastBase};
-        float coastSlope = 0.0;
-        for (int i = 0; i < ${islandCoastDirections.length}; i++) {
-          vec4 feature = coastFeatures[i];
-          float lobe = feature.z * exp(feature.w * (dot(direction, feature.xy) - 1.0));
-          coastRadius += lobe;
-          coastSlope += lobe * feature.w * dot(tangent, feature.xy);
-        }
+        float angle = radius > 0.0001 ? atan(direction.y, direction.x) : 0.0;
+        float sampleX = angle * 0.159154943 + 0.5 / ${coastSamples.toFixed(1)};
+        vec4 profile = texture2D(coastProfile, vec2(sampleX, 0.5));
+        // Each pair of channels contains one linearly interpolated 16-bit value.
+        vec2 unpack = vec2(256.0, 1.0) / 257.0;
+        float coastRadius = dot(profile.rg, unpack) * 2.0;
+        float coastSlope = dot(profile.ba, unpack) * 4.0 - 2.0;
         vec2 coastGradient = (direction - tangent * coastSlope / radius) / coast;
         float shore = (radius - coastRadius) / max(length(coastGradient), 0.0001);
         float shallows = 1.0 - smoothstep(0.15, 5.65, shore);
@@ -97,6 +115,7 @@ export function createIslandWater() {
     mesh,
     update(time: number) { material.uniforms.time.value = time; },
     dispose() {
+      coastProfile.dispose();
       geometry.dispose();
       material.dispose();
     },
