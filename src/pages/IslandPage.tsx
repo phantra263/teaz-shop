@@ -225,7 +225,7 @@ export default function IslandPage() {
                 </button>
               </div>
               <div className="island-help">
-                <span className="island-help-desktop"><kbd>WASD</kbd> hoặc <kbd>↑ ↓ ← →</kbd> để đi <span>·</span> Kéo để xoay</span>
+                <span className="island-help-desktop">Bấm đất hoặc <kbd>↑ ↓ ← →</kbd> để đi <span>·</span> Kéo để xoay</span>
                 <span className="island-help-touch">Chạm đất để đi · Kéo để xoay</span>
               </div>
             </>

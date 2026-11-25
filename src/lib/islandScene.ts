@@ -9,6 +9,7 @@ import { islandStops, type IslandStopId } from "../data/island";
 import type { IslandAnimalAction, IslandWildlifePrompt } from "../data/islandInteractions";
 import { createIslandBark, createIslandBarkMaterial } from "./islandBark";
 import { createIslandConifers } from "./islandConifers";
+import { createIslandDestinationMarker } from "./islandDestinationMarker";
 import { createMeadowTexture, createWoodlandFerns, createWoodlandFlowers, type FlowerPatch } from "./islandForestFloor";
 import { createIslandGrass } from "./islandGrass";
 import { createIslandLeaves, type FoliageCluster } from "./islandLeaves";
@@ -16,14 +17,14 @@ import { createIslandNavigation, type IslandObstacle } from "./islandNavigation"
 import { createIslandRelief, createIslandShore, createIslandTrail } from "./islandRelief";
 import { createIslandStone, createIslandStoneMaterial } from "./islandStone";
 import { islandCoastPoint, islandCoastRatio, islandElevation, islandGround, islandLandRadius, islandLayoutScale, islandPond, pondRadiusAt } from "./islandTerrain";
-import { createIslandSky } from "./islandSky";
+import { createIslandSky, islandSunDirection } from "./islandSky";
 import { createIslandWater } from "./islandWater";
 import { createIslandWildlife } from "./islandWildlife";
 import { islandWindGust } from "./islandWind";
 
 const controlsByKey = new Map([
-  ["w", [0, 1]], ["arrowup", [0, 1]], ["s", [0, -1]], ["arrowdown", [0, -1]],
-  ["a", [-1, 0]], ["arrowleft", [-1, 0]], ["d", [1, 0]], ["arrowright", [1, 0]],
+  ["arrowup", [0, 1]], ["arrowdown", [0, -1]],
+  ["arrowleft", [-1, 0]], ["arrowright", [1, 0]],
 ]);
 
 export function mountIslandScene(
@@ -55,8 +56,8 @@ export function mountIslandScene(
   renderer.shadowMap.autoUpdate = false;
   renderer.shadowMap.needsUpdate = true;
   const scene = new Scene();
-  scene.background = new Color("#9bd6cf");
-  const fog = new Fog("#b5dee5", 30, 93);
+  scene.background = new Color("#9cb9cc");
+  const fog = new Fog("#dac9d2", 35, 127);
   scene.fog = fog;
   const overview = new OrthographicCamera(-20, 20, 15, -15, 0.1, 160);
   overview.position.set(15, 22, 33).multiplyScalar(islandLayoutScale);
@@ -72,8 +73,8 @@ export function mountIslandScene(
   orbit.maxZoom = 2.2;
   orbit.update();
 
-  const sun = new DirectionalLight("#fff2cc", 2.62);
-  sun.position.set(-34, 53, 37);
+  const sun = new DirectionalLight("#ffe0ad", 2.56);
+  sun.position.copy(islandSunDirection).multiplyScalar(80);
   sun.castShadow = true;
   sun.shadow.mapSize.setScalar(lightQuality ? 1024 : 2048);
   sun.shadow.radius = 2.1;
@@ -82,7 +83,7 @@ export function mountIslandScene(
   const shadowSpan = islandGround.x + 5;
   Object.assign(sun.shadow.camera, { left: -shadowSpan, right: shadowSpan, top: shadowSpan, bottom: -shadowSpan, near: 1, far: 126 });
   sun.shadow.camera.updateProjectionMatrix();
-  scene.add(sun, new HemisphereLight("#e5f3ff", "#4b6556", 1.29));
+  scene.add(sun, new HemisphereLight("#dceafa", "#616276", 1.46));
 
   const materials = new Map<string, MeshStandardMaterial>();
   const geometries = new Set<BufferGeometry>();
@@ -121,6 +122,8 @@ export function mountIslandScene(
   scene.add(sky.dome, sky.cliffs);
   const wildlife = createIslandWildlife(scene);
   const navigation = createIslandNavigation();
+  const destinationMarker = createIslandDestinationMarker();
+  scene.add(destinationMarker.mesh);
   const shore = solid(createIslandShore(), "#fffdf9", scene, 0, 0, 0);
   shore.material.vertexColors = true;
   const meadowShape = createIslandRelief();
@@ -420,6 +423,7 @@ export function mountIslandScene(
   });
 
   const plankCount = Math.ceil((pierEnd - pierStart) / 0.36);
+  water.setPier(pierStart, pierStart + (plankCount - 1) * 0.36 + 0.17, 0.19);
   for (let index = 0; index < plankCount; index++) {
     const z = pierStart + index * 0.36;
     block(scene, index % 2 ? "#ac784e" : "#966039", 0, 0.27, z, 2.2, 0.16, 0.34);
@@ -427,6 +431,7 @@ export function mountIslandScene(
   }
   const boat = new Group();
   boat.position.set(2.12, -1.25, pierEnd - 0.6);
+  water.update(0, boat.position);
   boat.rotation.y = -0.24;
   scene.add(boat);
   solid(foliage, "#a25b3e", boat, 0, 0, 0).scale.set(0.66, 0.3, 1.52);
@@ -650,7 +655,7 @@ export function mountIslandScene(
   let targetStop: IslandStopId | undefined;
   let arrived: IslandStopId | undefined = spawn.id;
   let nearbyStop: IslandStopId | null = null;
-  let pointerStart: { id: number; x: number; y: number } | undefined;
+  let pointerStart: { id: number; button: number; x: number; y: number } | undefined;
   let frameBefore = 0;
   let nextFrame = 0;
   let sampleTime = 0;
@@ -716,21 +721,32 @@ export function mountIslandScene(
     if (!stop && targetStop) onCancelWalk();
     targetStop = stop;
     hasGoal = true;
+    return destination;
   }
 
   function pointerDown(event: PointerEvent) {
-    pointerStart = event.isPrimary && event.button === 0 ? { id: event.pointerId, x: event.clientX, y: event.clientY } : undefined;
+    pointerStart = event.isPrimary && (event.button === 0 || (event.pointerType === "mouse" && event.button === 2))
+      ? { id: event.pointerId, button: event.button, x: event.clientX, y: event.clientY }
+      : undefined;
   }
+  function pointerMove(event: PointerEvent) {
+    if (pointerStart?.id === event.pointerId && Math.hypot(pointerStart.x - event.clientX, pointerStart.y - event.clientY) > 7) pointerStart = undefined;
+  }
+  function pointerCancel() { pointerStart = undefined; }
+  function preventContextMenu(event: MouseEvent) { event.preventDefault(); }
   function pointerUp(event: PointerEvent) {
+    pointerMove(event);
     const start = pointerStart;
-    pointerStart = undefined;
-    if (!start || start.id !== event.pointerId || Math.hypot(start.x - event.clientX, start.y - event.clientY) > 7) return;
+    pointerCancel();
+    if (!start || start.id !== event.pointerId || start.button !== event.button) return;
     const bounds = canvas.getBoundingClientRect();
     cursor.set((event.clientX - bounds.left) / bounds.width * 2 - 1, 1 - (event.clientY - bounds.top) / bounds.height * 2);
     ray.setFromCamera(cursor, camera);
     const hit = ray.intersectObject(meadow, false)[0];
-    if (hit) setDestination(hit.point.x, hit.point.z);
-    else if (ray.ray.intersectPlane(ground, clickPoint)) setDestination(clickPoint.x, clickPoint.z);
+    const point = hit?.point ?? ray.ray.intersectPlane(ground, clickPoint);
+    if (!point) return;
+    const destination = setDestination(point.x, point.z);
+    if (destination) destinationMarker.show(destination.x, destination.z, !closeView);
   }
   function clearKeys() { keys.clear(); }
   function keyDown(event: KeyboardEvent) {
@@ -911,9 +927,9 @@ export function mountIslandScene(
 
     if (animateWeather) {
       weatherTime += Math.min(frameTime, 0.25);
-      water.update(weatherTime);
       sky.update(weatherTime);
       boat.position.y = -1.25 + Math.sin(weatherTime * 1.8) * 0.08;
+      water.update(weatherTime, boat.position);
       boat.rotation.z = Math.sin(weatherTime * 1.5) * 0.075;
       boat.rotation.x = Math.cos(weatherTime * 1.1) * 0.036;
       const sway = 1 - Math.exp(-5.5 * delta);
@@ -933,6 +949,7 @@ export function mountIslandScene(
     const layerLimit = closeView ? Math.min(grassLayers, lightQuality ? 2 : 3) : 1;
     grass.update(weatherTime, player.position, animateWeather, camera.position, layerLimit);
     leaves.update(weatherTime, animateWeather);
+    destinationMarker.update(delta, animateWeather);
     if (closeView) sky.dome.position.copy(camera.position);
     renderer.render(scene, camera);
 
@@ -972,7 +989,10 @@ export function mountIslandScene(
   viewObserver.observe(host);
   document.addEventListener("visibilitychange", syncAnimation);
   canvas.addEventListener("pointerdown", pointerDown);
+  canvas.addEventListener("pointermove", pointerMove);
   canvas.addEventListener("pointerup", pointerUp);
+  canvas.addEventListener("pointercancel", pointerCancel);
+  canvas.addEventListener("contextmenu", preventContextMenu);
   window.addEventListener("keydown", keyDown);
   window.addEventListener("keyup", keyUp);
   window.addEventListener("blur", clearKeys);
@@ -996,9 +1016,9 @@ export function mountIslandScene(
       } else orbit.target.copy(overviewTarget);
       sky.dome.visible = enabled;
       sky.cliffs.visible = enabled;
-      fog.color.set(enabled ? "#b5dee5" : "#9bd6cf");
-      fog.near = enabled ? 34 : 83;
-      fog.far = enabled ? 118 : 155;
+      fog.color.set(enabled ? "#dac9d2" : "#9cb9cc");
+      fog.near = enabled ? 40 : 83;
+      fog.far = enabled ? 130 : 155;
       orbit.update();
     },
     walkTo(id: IslandStopId) {
@@ -1017,10 +1037,14 @@ export function mountIslandScene(
       window.removeEventListener("keyup", keyUp);
       window.removeEventListener("blur", clearKeys);
       canvas.removeEventListener("pointerdown", pointerDown);
+      canvas.removeEventListener("pointermove", pointerMove);
       canvas.removeEventListener("pointerup", pointerUp);
+      canvas.removeEventListener("pointercancel", pointerCancel);
+      canvas.removeEventListener("contextmenu", preventContextMenu);
       geometries.forEach((geometry) => geometry.dispose());
       materials.forEach((material) => material.dispose());
       water.dispose();
+      destinationMarker.dispose();
       sky.dispose();
       wildlife.dispose();
       grass.dispose();

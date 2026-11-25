@@ -50,23 +50,26 @@ export function createIslandShore() {
   const dune = new Color("#a9a472");
   const drySand = new Color("#dbc18b");
   const wetSand = new Color("#8f8469");
-  const rock = new Color("#777d71");
+  const rock = new Color("#757b8a");
+  const ledge = new Color("#b8a591");
   const tint = new Color();
 
   for (let segment = 0; segment < radialSegments; segment++) {
     const angle = segment / radialSegments * Math.PI * 2;
     const sandiness = 0.5 + 0.5 * Math.cos(angle * 3 - 0.6);
+    const seam = Math.sin(angle * 26 + 0.38 * Math.sin(angle * 13));
     const shelf = 0.006 * Math.sin(angle * 9 + 1) - sandiness * 0.022;
     const sections = [
       { radius: islandLandRadius - 0.011, y: 0.082, color: dune },
       { radius: islandLandRadius + 0.003 + shelf * 0.23, y: 0.074, color: drySand },
       { radius: 0.985 + shelf * 0.32, y: -0.75 + sandiness * 0.52, color: drySand },
+      { radius: 0.992 + seam * (1 - sandiness) * 0.003, y: -1.08 + seam * (1 - sandiness) * 0.11, color: ledge },
       { radius: 1, y: -1.58, color: wetSand },
       { radius: 1.027, y: -2.17, color: rock },
     ];
     sections.forEach(({ radius, y, color }, section) => {
       const { x, z } = islandCoastPoint(angle, radius);
-      tint.copy(color).lerp(rock, (1 - sandiness) * 0.54)
+      tint.copy(color).lerp(rock, (1 - sandiness) * (0.51 + seam * 0.20))
         .multiplyScalar(0.91 + 0.06 * Math.sin(angle * 31 + section) + 0.04 * Math.sin(angle * 63 - section));
       positions.push(x, y, z);
       colors.push(tint.r, tint.g, tint.b);
