@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Bell, ChartNoAxesCombined, ScanSearch } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FacebookIcon } from "../components/icons";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { shopeePriceFeatures, shopeePriceTool } from "../data/tools";
 import "./shop.css";
 
@@ -23,7 +24,10 @@ export function ToolsPage() {
             <img src="/avatar.png" width="42" height="42" alt="" />
             <span>TeaZ</span>
           </Link>
-          <Link className="hub-button hub-button-secondary" to="/profile">Portfolio Trà Phan</Link>
+          <div className="hub-toolbar-actions">
+            <Link className="hub-button hub-button-secondary" to="/profile">Portfolio Trà Phan</Link>
+            <ThemeToggle />
+          </div>
         </header>
         <main className="hub-tools-main">
           <section className="hub-tools-hero" aria-labelledby="tool-title">

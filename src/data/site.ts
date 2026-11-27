@@ -10,12 +10,12 @@
 export interface Product {
   id: number;
   name: string;
-  category: "beauty" | "home";
+  category: Exclude<CategoryId, "all">;
   categoryLabel: string;
   description: string;
-  icon: string;
+  cover: string;
   shopeeUrl?: string;
-  reviewUrl?: string;
+  reviewUrl: string;
 }
 
 export const SITE_URL = (
@@ -36,30 +36,40 @@ export const site = {
 
 export const categories = [
   { id: "all", label: "Tất cả" },
-  { id: "beauty", label: "✨ Làm đẹp" },
-  { id: "home", label: "🍳 Gia dụng" },
+  { id: "personal-care", label: "Chăm sóc cá nhân" },
+  { id: "beauty", label: "Làm đẹp" },
+  { id: "home", label: "Gia dụng" },
 ] as const;
 
 export type CategoryId = (typeof categories)[number]["id"];
 
 export const products: Product[] = [
   {
+    id: 3,
+    name: "Dầu nóng Hàn Quốc Antiphlamine có đầu lăn",
+    category: "personal-care",
+    categoryLabel: "Chăm sóc cá nhân",
+    description: "Video giới thiệu thiết kế chai và thanh lăn răng cưa gắn bên hông.",
+    cover: "/reviews/antiphlamine.avif",
+    reviewUrl: "https://www.tiktok.com/@teaz_shop/video/7712452283572899090",
+  },
+  {
     id: 1,
-    name: "Xịt Khoáng Serum d'Alba White Truffle",
+    name: "Xịt khoáng d’Alba White Truffle First Spray Serum",
     category: "beauty",
     categoryLabel: "Làm đẹp",
-    description:
-      "Cấp ẩm căng bóng 2 lớp tinh chất nấm Truffle trắng, tia sương siêu mịn.",
-    icon: "✨",
+    description: "Video giới thiệu tia xịt mịn và độ bóng nhẹ sau khi dùng.",
+    cover: "/reviews/dalba.avif",
+    reviewUrl: "https://www.tiktok.com/@teaz_shop/video/7710108122848808200",
   },
   {
     id: 2,
-    name: "Bộ Nồi Chảo Redchef Cán Tháo Rời",
+    name: "Bộ nồi chảo Redchef cán tháo rời",
     category: "home",
     categoryLabel: "Gia dụng",
-    description:
-      "Chống dính gốm an toàn, tháo cán xếp gọn tiết kiệm 70% diện tích bếp.",
-    icon: "🍳",
+    description: "Bộ màu kem có cán tháo rời để xếp gọn. Video có đoạn áp chảo thử.",
+    cover: "/reviews/redchef.avif",
+    reviewUrl: "https://www.tiktok.com/@teaz_shop/video/7710962187103177991",
   },
 ];
 

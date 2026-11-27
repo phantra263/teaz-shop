@@ -180,7 +180,7 @@ export function ProfilePage() {
           </div>
         </section>
         <section className="mx-auto max-w-4xl rounded-3xl border border-white/15 bg-[#22262b] p-5 sm:p-8" aria-labelledby="creator-project-title">
-          <h2 id="creator-project-title" className="text-2xl font-semibold text-white">Dự án TeaZ</h2>
+          <h2 id="creator-project-title" className="text-2xl font-semibold text-white">Dự án Tea<span className="teaz-letter-z">Z</span></h2>
           <p className="mt-3 max-w-2xl leading-relaxed text-white/75">
             Website mình xây dựng để kết nối nội dung review trên TikTok, YouTube và Facebook với danh mục sản phẩm và bộ sưu tập Shopee.
           </p>

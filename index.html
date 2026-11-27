@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      try {
+        const theme = localStorage.getItem("teaz-theme");
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
     <title>TeaZ | Review sản phẩm, Shopee & TikTok Shop</title>
     <meta
       name="description"
@@ -61,7 +67,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,600;1,600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap"
       rel="stylesheet"
     />
 
@@ -115,21 +121,27 @@
           {
             "@type": "ItemList",
             "@id": "%VITE_SITE_URL%/#products",
-            "name": "Khám phá sản phẩm",
+            "name": "Sản phẩm đã review",
             "itemListOrder": "https://schema.org/ItemListOrderAscending",
-            "numberOfItems": 2,
+            "numberOfItems": 3,
             "itemListElement": [
               {
                 "@type": "ListItem",
                 "position": 1,
-                "name": "Xịt Khoáng Serum d'Alba White Truffle",
-                "description": "Cấp ẩm căng bóng 2 lớp tinh chất nấm Truffle trắng, tia sương siêu mịn."
+                "name": "Dầu nóng Hàn Quốc Antiphlamine có đầu lăn",
+                "description": "Video giới thiệu thiết kế chai và thanh lăn răng cưa gắn bên hông."
               },
               {
                 "@type": "ListItem",
                 "position": 2,
-                "name": "Bộ Nồi Chảo Redchef Cán Tháo Rời",
-                "description": "Chống dính gốm an toàn, tháo cán xếp gọn tiết kiệm 70% diện tích bếp."
+                "name": "Xịt khoáng d’Alba White Truffle First Spray Serum",
+                "description": "Video giới thiệu tia xịt mịn và độ bóng nhẹ sau khi dùng."
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Bộ nồi chảo Redchef cán tháo rời",
+                "description": "Bộ màu kem có cán tháo rời để xếp gọn. Video có đoạn áp chảo thử."
               }
             ]
           },
@@ -193,10 +205,11 @@
           <li><a href="/tools">Shopee Price History &amp; Fake Sale Detector</a></li>
           <li><a href="mailto:phantra2212@gmail.com">phantra2212@gmail.com</a></li>
         </ul>
-        <h2>Khám phá sản phẩm</h2>
+        <h2>Sản phẩm đã review</h2>
         <ul>
-          <li>Xịt Khoáng Serum d'Alba White Truffle</li>
-          <li>Bộ Nồi Chảo Redchef Cán Tháo Rời</li>
+          <li><a href="https://www.tiktok.com/@teaz_shop/video/7712452283572899090">Dầu nóng Hàn Quốc Antiphlamine có đầu lăn</a></li>
+          <li><a href="https://www.tiktok.com/@teaz_shop/video/7710108122848808200">Xịt khoáng d’Alba White Truffle First Spray Serum</a></li>
+          <li><a href="https://www.tiktok.com/@teaz_shop/video/7710962187103177991">Bộ nồi chảo Redchef cán tháo rời</a></li>
         </ul>
       </main>
     </noscript>

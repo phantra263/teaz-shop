@@ -26,7 +26,7 @@ function readMotionPreference() {
   } catch {
     // Browsers can block storage without blocking the 3D scene.
   }
-  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return true;
 }
 
 export default function IslandPage() {

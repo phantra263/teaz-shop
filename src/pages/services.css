@@ -1,5 +1,5 @@
-.service-shell { background: #f5f6ee; }
-.service-contact { border-color: #bdcfba; }
+.service-shell { background: light-dark(#f5f6ee, #111e18); }
+.service-contact { border-color: var(--hub-border); }
 .service-hero { display: grid; grid-template-columns: minmax(0, .96fr) minmax(0, 1fr); position: relative; border-radius: 1.6rem; overflow: hidden; color: #fbfcf2; background: #123a2c; }
 .service-hero-copy { align-self: center; padding: clamp(1.6rem, 4.5vw, 3.4rem); }
 .service-hero h1 { font: 800 clamp(1.9rem, 4.6vw, 3.8rem)/1.19 var(--font-display); letter-spacing: -.045em; }
@@ -10,18 +10,18 @@
 .service-hero-visual::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #123a2c 0%, transparent 16%); pointer-events: none; }
 
 .service-categories { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .75rem; margin-top: 1.1rem; }
-.service-category { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: .42rem; padding: .85rem; text-align: left; border: 1px solid var(--hub-border); border-radius: .95rem; background: white; cursor: pointer; transition: border-color 160ms, box-shadow 160ms; }
+.service-category { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: .42rem; padding: .85rem; text-align: left; border: 1px solid var(--hub-border); border-radius: .95rem; background: var(--hub-surface); cursor: pointer; transition: border-color 160ms, box-shadow 160ms; }
 .service-category:hover { border-color: #78a887; }
-.service-category[aria-pressed="true"] { border-color: #437a54; box-shadow: inset 0 0 0 1px #437a54; background: #f5faf1; }
+.service-category[aria-pressed="true"] { border-color: #437a54; box-shadow: inset 0 0 0 1px #437a54; background: var(--hub-hover); }
 .service-category strong { font-size: .9375rem; line-height: 1.35; }
 .service-category-count { margin-top: auto; color: var(--hub-muted); font-size: .8125rem; }
 .service-category-icon { width: 2.65rem; height: 2.65rem; display: grid; place-items: center; border-radius: .7rem; margin-bottom: .1rem; }
-.service-page [data-category] { --service-tint: #e4efdc; --service-accent: #205639; }
-.service-page [data-category="ai"] { --service-tint: #e6f1e4; --service-accent: #276342; }
-.service-page [data-category="streaming"] { --service-tint: #fbe8e3; --service-accent: #983d32; }
-.service-page [data-category="creative"] { --service-tint: #eee7f8; --service-accent: #65458f; }
-.service-page [data-category="productivity"] { --service-tint: #fbedd6; --service-accent: #7d511e; }
-.service-page [data-category="vpn"] { --service-tint: #e2eef6; --service-accent: #2d597b; }
+.service-page [data-category] { --service-tint: light-dark(#e4efdc, #2a4034); --service-accent: light-dark(#205639, #b4d9b8); }
+.service-page [data-category="ai"] { --service-tint: light-dark(#e6f1e4, #2b4237); --service-accent: light-dark(#276342, #add7bb); }
+.service-page [data-category="streaming"] { --service-tint: light-dark(#fbe8e3, #4a3632); --service-accent: light-dark(#983d32, #f0b4a9); }
+.service-page [data-category="creative"] { --service-tint: light-dark(#eee7f8, #3e354f); --service-accent: light-dark(#65458f, #d9c0f5); }
+.service-page [data-category="productivity"] { --service-tint: light-dark(#fbedd6, #463925); --service-accent: light-dark(#7d511e, #eec88d); }
+.service-page [data-category="vpn"] { --service-tint: light-dark(#e2eef6, #283f4a); --service-accent: light-dark(#2d597b, #abd4ed); }
 .service-category-icon, .service-group h3 { background: var(--service-tint); color: var(--service-accent); }
 
 .service-results-toolbar { display: flex; justify-content: space-between; align-items: center; gap: .7rem 1rem; margin-block: 1rem; }
@@ -31,22 +31,22 @@
 .service-result-count { white-space: nowrap; color: var(--hub-muted); font-size: .875rem; font-weight: 650; }
 .service-groups { columns: 2; column-gap: 1rem; }
 .service-groups:has(> :only-child) { columns: 1; }
-.service-group { display: inline-block; width: 100%; margin-bottom: 1rem; overflow: hidden; border: 1px solid var(--hub-border); border-radius: 1.1rem; background: white; }
+.service-group { display: inline-block; width: 100%; margin-bottom: 1rem; overflow: hidden; border: 1px solid var(--hub-border); border-radius: 1.1rem; background: var(--hub-surface); }
 .service-group h3 { display: flex; align-items: center; gap: .6rem; padding: .9rem 1rem; font: 800 1.05rem/1.35 var(--font-display); }
 .service-price-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .7rem; padding: .62rem 1rem; font-size: .9375rem; }
-.service-price-row + .service-price-row { border-top: 1px solid #edf0ea; }
+.service-price-row + .service-price-row { border-top: 1px solid var(--hub-border); }
 .service-price-row dt { display: flex; align-items: center; gap: .65rem; min-width: 0; overflow-wrap: anywhere; }
 .service-app-icon { display: grid; place-items: center; flex: none; width: 2.2rem; height: 2.2rem; border: 1px solid #ebefe8; border-radius: .6rem; background: #f8faf6; }
 .service-app-icon img { display: block; width: 1.5rem; height: 1.5rem; object-fit: contain; }
-.service-price-row dd { padding: .23rem .55rem; border-radius: .45rem; background: #edf4e9; color: var(--hub-green); font-weight: 750; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.service-price-row dd { padding: .23rem .55rem; border-radius: .45rem; background: var(--hub-tint); color: var(--hub-green); font-weight: 750; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 .service-contact-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 1rem; }
 .service-social, .service-coffee { padding: clamp(1.2rem, 3vw, 2rem); border-radius: 1.15rem; }
-.service-social { border: 1px solid #d7e5ce; background: #e7f0df; }
-.service-coffee { border: 1px solid #eedcc2; background: #fff3e1; }
+.service-social { border: 1px solid var(--hub-border); background: var(--hub-tint); }
+.service-coffee { border: 1px solid light-dark(#eedcc2, #594936); background: light-dark(#fff3e1, #342c22); }
 .service-social-icons { display: flex; gap: .4rem; margin-bottom: .75rem; }
 .service-social-icons span, .service-coffee-icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: .7rem; }
-.service-coffee-icon { margin-bottom: .75rem; color: #7d511e; background: #f4e0bf; }
+.service-coffee-icon { margin-bottom: .75rem; color: light-dark(#7d511e, #eec88d); background: light-dark(#f4e0bf, #4b3a27); }
 .service-contact-grid .hub-button { margin-top: 1rem; }
 
 @media (max-width: 910px) {

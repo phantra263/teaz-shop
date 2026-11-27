@@ -16,10 +16,10 @@ export function ProfileHeader() {
             Xem trải nghiệm thực tế của Trà Phan về đồ làm đẹp, gia dụng, thời trang và công nghệ.
           </p>
           <div className="hub-actions">
-            <a className="hub-button hub-button-primary" href="#san-pham">
+            <a className="hub-button hub-button-light" href="#san-pham">
               <ShoppingBag size={18} aria-hidden="true" /> Khám phá sản phẩm
             </a>
-            <a className="hub-button hub-button-secondary" href="#kenh-noi-dung">
+            <a className="hub-button hub-button-outline" href="#kenh-noi-dung">
               <Play size={17} aria-hidden="true" /> Xem các kênh
             </a>
           </div>
@@ -36,7 +36,7 @@ export function ProfileHeader() {
       </div>
       <div className="hub-hero-slide hub-hero-island" inert={!showIsland}>
         <div className="hub-hero-copy">
-          <h1>Khám phá Đảo Trà</h1>
+          <h1>Khám phá <span className="hub-title-accent">Đảo Trà</span></h1>
           <p className="hub-hero-description">
             Dạo từ Bến Trà qua rừng, đầm sen và những con đường ven biển trong thế giới 3D của TeaZ.
           </p>

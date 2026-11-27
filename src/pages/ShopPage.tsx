@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Mail } from "lucide-react";
 import { site } from "../data/site";
 import { copyText } from "../lib/clipboard";
@@ -7,9 +7,9 @@ import { useShopMotion } from "../hooks/useShopMotion";
 import { useToast } from "../hooks/useToast";
 import { AboutSection } from "../components/AboutSection";
 import { ContactModal } from "../components/ContactModal";
-import { FallingLeaves } from "../components/FallingLeaves";
 import { FeaturedTool } from "../components/FeaturedTool";
 import { InAppBanner } from "../components/InAppBanner";
+import { ScrollLeaves } from "../components/ScrollLeaves";
 import { LinkCards } from "../components/LinkCards";
 import { ProductList } from "../components/ProductList";
 import { ProfileHeader } from "../components/ProfileHeader";
@@ -22,12 +22,16 @@ import "./shop.css";
 export function ShopPage() {
   const { message, showToast } = useToast();
   const [contactOpen, setContactOpen] = useState(false);
-  const [leavesOn, setLeavesOn] = useState(false);
   const motionEnabled = useShopMotion();
+  const { hash, key } = useLocation();
 
   useEffect(() => {
     document.title = site.pageTitle;
   }, []);
+
+  useEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
+  }, [hash, key]);
 
   const closeContact = useCallback(() => setContactOpen(false), []);
   const copyPageLink = useCallback(async () => {
@@ -52,13 +56,13 @@ export function ShopPage() {
   }, [copyPageLink]);
 
   return (
-    <div className="hub" id="dau-trang" data-motion-enabled={motionEnabled}>
-      <a href="#noi-dung" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-3">
+    <div className="hub hub-home" id="dau-trang" data-motion-enabled={motionEnabled}>
+      <a href="#noi-dung" className="hub-skip-link sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-3">
         Đi tới nội dung
       </a>
-      <FallingLeaves enabled={motionEnabled && leavesOn} />
       <InAppBanner />
       <div className="hub-container">
+        <ScrollLeaves subtle={!motionEnabled} />
         <Toolbar onShare={() => void handleShare()} />
         <main id="noi-dung">
           <ProfileHeader />
@@ -68,7 +72,7 @@ export function ShopPage() {
           <FeaturedTool />
           <section className="hub-section hub-booking" id="hop-tac" aria-labelledby="booking-title">
             <div>
-              <h2 className="hub-heading" id="booking-title">Hợp tác cùng TeaZ</h2>
+              <h2 className="hub-heading" id="booking-title">Hợp tác cùng <span className="hub-title-accent">Tea<span className="teaz-letter-z">Z</span></span></h2>
               <p className="hub-description">
                 Gửi brief, thông tin sản phẩm và kênh bạn muốn triển khai để trao đổi về video review hoặc chiến dịch affiliate.
               </p>
@@ -82,7 +86,7 @@ export function ShopPage() {
           </section>
           <AboutSection />
         </main>
-        <SiteFooter onCopyLink={() => void copyPageLink()} leavesOn={leavesOn} onToggleLeaves={() => setLeavesOn((value) => !value)} />
+        <SiteFooter />
       </div>
       <Toast message={message} />
       {contactOpen && <ContactModal onClose={closeContact} />}

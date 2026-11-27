@@ -47,9 +47,13 @@ export const islandPlaces: readonly IslandPlace[] = [
     id: "market",
     slug: "cho-tra",
     heading: "Sản phẩm TeaZ giới thiệu",
-    intro: "Tìm các món làm đẹp, đồ gia dụng, thời trang và phụ kiện công nghệ đã được TeaZ giới thiệu.",
+    intro: "Xem các sản phẩm từ video ghim của TeaZ trên TikTok.",
     preview: products.map(({ categoryLabel }) => categoryLabel),
-    entries: products.map(({ name, description }) => ({ title: name, description })),
+    entries: products.map(({ name, description, reviewUrl }) => ({
+      title: name,
+      description,
+      link: { label: "Xem video review", href: reviewUrl },
+    })),
     links: [
       { label: "Mở bộ sưu tập Shopee", href: site.shopeeCollectionUrl, sponsored: true },
       { label: "Tìm và lọc sản phẩm", href: "/#san-pham" },

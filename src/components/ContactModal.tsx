@@ -32,7 +32,7 @@ export function ContactModal({ onClose }: ContactModalProps) {
     <dialog
       ref={dialogRef}
       aria-labelledby="contact-title"
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-3xl bg-white p-5 text-slate-900 shadow-2xl backdrop:bg-slate-900/65 sm:p-6"
+      className="hub-contact-dialog m-auto w-[calc(100%-2rem)] max-w-md rounded-3xl p-5 shadow-2xl backdrop:bg-slate-900/65 sm:p-6"
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -49,15 +49,15 @@ export function ContactModal({ onClose }: ContactModalProps) {
           </button>
         </div>
 
-        <p className="mb-4 leading-relaxed text-slate-600">
+        <p className="hub-contact-muted mb-4 leading-relaxed">
           Gửi brief, thông tin sản phẩm và kênh mong muốn để TeaZ trao đổi về nội dung hợp tác.
         </p>
 
         <div className="space-y-2.5">
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="hub-contact-email flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3">
             <div>
-              <p className="mb-0.5 text-sm text-slate-600">Email booking</p>
-              <a className="break-all font-semibold text-tea-800 underline" href={`mailto:${site.bookingEmail}`}>
+              <p className="hub-contact-muted mb-0.5 text-sm">Email booking</p>
+              <a className="break-all font-semibold underline" href={`mailto:${site.bookingEmail}`}>
                 {site.bookingEmail}
               </a>
             </div>
@@ -66,9 +66,9 @@ export function ContactModal({ onClose }: ContactModalProps) {
             </button>
           </div>
           <a className="hub-button hub-button-secondary w-full" href={site.facebookPageUrl} target="_blank" rel="noopener noreferrer">
-            <FacebookIcon className="size-5 text-blue-700" /> Nhắn Facebook TeaZ Code
+            <FacebookIcon className="size-5" /> Nhắn Facebook TeaZ Code
           </a>
-          <p className="text-sm text-slate-700 empty:hidden" role="status">{status}</p>
+          <p className="hub-contact-muted text-sm empty:hidden" role="status">{status}</p>
         </div>
       </div>
     </dialog>

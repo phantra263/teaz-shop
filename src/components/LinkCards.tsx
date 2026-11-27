@@ -39,7 +39,7 @@ const channels = [
 export function LinkCards() {
   return (
     <section className="hub-section" id="kenh-noi-dung" aria-labelledby="channels-title">
-      <h2 className="hub-heading" id="channels-title">Theo dõi TeaZ</h2>
+      <h2 className="hub-heading" id="channels-title">Theo dõi <span className="hub-title-accent">Tea<span className="teaz-letter-z">Z</span></span></h2>
       <div className="hub-channel-grid">
         {channels.map(({ name, detail, href, icon: Icon, style, rel }) => (
           <a className="hub-channel" key={name} href={href} target="_blank" rel={rel}>

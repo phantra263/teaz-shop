@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Bot, Coffee, GraduationCap, LayoutGrid, MessageCircle, Palette, Search, Shield, TvMinimalPlay } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FacebookIcon, TikTokIcon, YouTubeIcon } from "../components/icons";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { serviceCatalog, servicesPage } from "../data/services";
 import { foldVi } from "../lib/text";
 import "./shop.css";
@@ -10,7 +11,7 @@ import "./services.css";
 type Category = "all" | (typeof serviceCatalog)[number]["id"];
 
 const zaloUrl = `https://zalo.me/${servicesPage.zaloPhone}`;
-const formatPrice = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" });
+const thousands = new Intl.NumberFormat("vi-VN");
 const categoryIcons = { all: LayoutGrid, ai: Bot, streaming: TvMinimalPlay, creative: Palette, productivity: GraduationCap, vpn: Shield };
 const categories = [
   { id: "all" as const, label: "Tất cả", count: serviceCatalog.reduce((count, group) => count + group.packages.length, 0) },
@@ -45,9 +46,12 @@ export function ServicesPage() {
             <img src="/avatar.png" width="42" height="42" alt="" />
             <span>TeaZ</span>
           </Link>
-          <a className="hub-button hub-button-secondary service-contact" href={zaloUrl} target="_blank" rel="noopener noreferrer">
-            <MessageCircle size={17} aria-hidden="true" /> Zalo {servicesPage.zaloPhone}
-          </a>
+          <div className="hub-toolbar-actions">
+            <a className="hub-button hub-button-secondary service-contact" href={zaloUrl} target="_blank" rel="noopener noreferrer">
+              <MessageCircle size={17} aria-hidden="true" /> Zalo {servicesPage.zaloPhone}
+            </a>
+            <ThemeToggle />
+          </div>
         </header>
         <main className="hub-tools-main service-page">
           <section className="service-hero" aria-labelledby="service-title">
@@ -72,7 +76,7 @@ export function ServicesPage() {
             <div className="hub-section-header">
               <div>
                 <h2 className="hub-heading" id="price-list-title">Bảng giá gói trải nghiệm</h2>
-                <p className="hub-description">Giá tham khảo tính bằng đồng Việt Nam. Nhắn Zalo để biết hình thức cấp quyền và hỗ trợ của từng gói.</p>
+                <p className="hub-description">Giá tham khảo tính theo nghìn đồng (1k = 1.000đ). Nhắn Zalo để biết hình thức cấp quyền và hỗ trợ của từng gói.</p>
               </div>
               <a className="hub-button hub-button-secondary" href="#mang-xa-hoi">Dịch vụ mạng xã hội</a>
             </div>
@@ -112,7 +116,7 @@ export function ServicesPage() {
                               </span>
                               <span>{name}</span>
                             </dt>
-                            <dd>{formatPrice.format(price)}</dd>
+                            <dd>{thousands.format(price / 1000)}k</dd>
                           </div>
                         ))}
                       </dl>
@@ -145,7 +149,7 @@ export function ServicesPage() {
             </section>
             <aside className="service-coffee">
               <span className="service-coffee-icon"><Coffee size={24} aria-hidden="true" /></span>
-              <h2 className="hub-heading">Mời TeaZ một ly cà phê</h2>
+              <h2 className="hub-heading">Mời Tea<span className="teaz-letter-z">Z</span> một ly cà phê</h2>
               <p className="hub-description">Nếu thấy các công cụ TeaZ hữu ích, bạn có thể nhắn mình để ủng hộ.</p>
               <a className="hub-button hub-button-secondary" href={zaloUrl} target="_blank" rel="noopener noreferrer">Nhắn TeaZ</a>
             </aside>
