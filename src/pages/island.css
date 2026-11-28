@@ -34,6 +34,10 @@
 
 .island-stage {
   --stage-gutter: clamp(.8rem, 2.5vw, 1.65rem);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
   position: relative;
   isolation: isolate;
   height: clamp(435px, 75svh, 860px);

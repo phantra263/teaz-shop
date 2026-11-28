@@ -45,9 +45,11 @@ export function mountIslandScene(
 ) {
   const mobile = window.matchMedia("(pointer: coarse)").matches;
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-  let lightQuality = mobile || navigator.hardwareConcurrency <= 4 || (memory !== undefined && memory <= 4);
+  const limitedHardware = navigator.hardwareConcurrency <= 4 || (memory !== undefined && memory <= 4);
+  let lightQuality = mobile || limitedHardware;
+  let mobileRatioCap = limitedHardware ? 1.5 : 2;
   const grassLayers = lightQuality ? 2 : 3;
-  const gl = canvas.getContext("webgl2", { antialias: !lightQuality, alpha: false });
+  const gl = canvas.getContext("webgl2", { antialias: !limitedHardware, alpha: false });
   if (!gl) return;
 
   const renderer = new WebGLRenderer({ canvas, context: gl });
@@ -765,8 +767,9 @@ export function mountIslandScene(
   function keyUp(event: KeyboardEvent) { keys.delete(event.key.toLowerCase()); }
 
   function resizeBuffer() {
-    const pixelBudget = lightQuality ? 650_000 : 1_200_000;
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, lightQuality ? 0.9 : 1.25, Math.sqrt(pixelBudget / (width * height)));
+    const pixelBudget = mobile ? 1_000_000 : lightQuality ? 650_000 : 1_200_000;
+    const ratioCap = mobile ? mobileRatioCap : lightQuality ? 0.9 : 1.25;
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, ratioCap, Math.sqrt(pixelBudget / (width * height)));
     renderer.setDrawingBufferSize(width, height, pixelRatio);
   }
   const resize = () => {
@@ -795,7 +798,7 @@ export function mountIslandScene(
     const frameTime = frameBefore ? (frame - frameBefore) / 1000 : 0;
     const delta = Math.min(frameTime, 0.085);
     frameBefore = frame;
-    if (!lightQuality && frameTime > 0 && frameTime < 0.25) {
+    if ((!lightQuality || (mobile && mobileRatioCap > 1)) && frameTime > 0 && frameTime < 1) {
       sampleTime += frameTime;
       sampleFrames++;
       if (sampleTime >= 1.5) {
@@ -803,6 +806,8 @@ export function mountIslandScene(
         sampleTime = 0;
         sampleFrames = 0;
         if (slowSamples >= 2) {
+          slowSamples = 0;
+          if (mobile) mobileRatioCap = Math.max(1, mobileRatioCap - 0.5);
           lightQuality = true;
           resizeBuffer();
         }
