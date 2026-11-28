@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowUpRight, Play, Search } from "lucide-react";
 import { categories, products, site, type CategoryId } from "../data/site";
 import { foldVi } from "../lib/text";
+import { TikTokIcon } from "./icons";
 
 export function ProductList() {
   const [query, setQuery] = useState("");
@@ -20,8 +21,8 @@ export function ProductList() {
           <h2 className="hub-heading" id="san-pham-heading">Sản phẩm <span className="hub-title-accent">đã review</span></h2>
           <p className="hub-description">Từ các video ghim của TeaZ trên TikTok.</p>
         </div>
-        <a className="hub-review-link" href={site.shopeeCollectionUrl} target="_blank" rel="sponsored noopener noreferrer">
-          Bộ sưu tập Shopee <ArrowUpRight size={16} aria-hidden="true" />
+        <a className="hub-review-link" href={site.tiktokProfileUrl} target="_blank" rel="noopener noreferrer">
+          <TikTokIcon className="size-4" /> Mở TikTok @teaz_shop <ArrowUpRight size={16} aria-hidden="true" />
         </a>
       </div>
 
@@ -54,14 +55,14 @@ export function ProductList() {
               >
                 <div className="hub-review-cover">
                   <img src={product.cover} alt="" width={405} height={720} loading="lazy" decoding="async" />
+                  <span className="hub-review-category">{product.categoryLabel}</span>
                   <span className="hub-review-play" aria-hidden="true"><Play size={17} fill="currentColor" /></span>
                 </div>
                 <div className="hub-product-copy">
-                  <p className="hub-review-category">{product.categoryLabel}</p>
                   <h3 id={`review-name-${product.id}`}>{product.name}</h3>
                   <p>{product.description}</p>
                   <span className="hub-review-link" id={`review-action-${product.id}`}>
-                    Xem trên TikTok <ArrowUpRight size={15} aria-hidden="true" />
+                    <TikTokIcon className="size-4" /> Xem trên TikTok <ArrowUpRight size={15} aria-hidden="true" />
                   </span>
                 </div>
               </a>
@@ -86,10 +87,6 @@ export function ProductList() {
           </button>
         </div>
       )}
-      <p className="hub-disclosure" id="affiliate">
-        TeaZ có thể nhận hoa hồng từ đơn hàng qua liên kết tiếp thị. Giá và khuyến mãi hiển thị tại sàn.
-        {" "}<a href="#cong-cu">Kiểm tra lịch sử giá Shopee</a>.
-      </p>
     </section>
   );
 }

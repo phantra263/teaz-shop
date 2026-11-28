@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { Bell, ChartNoAxesCombined, ScanSearch } from "lucide-react";
+import { ArrowUpRight, Bell, ChartNoAxesCombined, Chrome, ScanSearch } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FacebookIcon } from "../components/icons";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { ToolPreview } from "../components/ToolPreview";
 import { shopeePriceFeatures, shopeePriceTool } from "../data/tools";
 import "./shop.css";
 
@@ -17,7 +18,7 @@ export function ToolsPage() {
   }, []);
 
   return (
-    <div className="hub">
+    <div className="hub hub-tools-page">
       <div className="hub-container">
         <header className="hub-tools-toolbar">
           <Link to="/" className="hub-brand">
@@ -30,25 +31,27 @@ export function ToolsPage() {
           </div>
         </header>
         <main className="hub-tools-main">
-          <section className="hub-tools-hero" aria-labelledby="tool-title">
-            <span className="hub-tool-icon" aria-hidden="true"><ChartNoAxesCombined size={34} /></span>
-            <p className="hub-eyebrow">Tiện ích Chrome của TeaZ</p>
-            <h1 id="tool-title">{shopeePriceTool.name}</h1>
-            <p className="hub-hero-description">{shopeePriceTool.description}</p>
-            <a className="hub-button hub-button-light" href={shopeePriceTool.storeUrl} target="_blank" rel="noopener noreferrer">
-              Mở Chrome Web Store
-            </a>
+          <section className="hub-tool-card" aria-labelledby="tool-title">
+            <div className="hub-featured-tool-copy">
+              <p className="hub-featured-tool-platform"><Chrome size={16} aria-hidden="true" /> Tiện ích Chrome của TeaZ</p>
+              <h1 id="tool-title" lang="en">Shopee Price History <em>&amp; Fake Sale Detector</em></h1>
+              <p className="hub-featured-tool-description">{shopeePriceTool.description}</p>
+              <a className="hub-button hub-button-light" href={shopeePriceTool.storeUrl} target="_blank" rel="noopener noreferrer">
+                Mở Chrome Web Store <ArrowUpRight size={17} aria-hidden="true" />
+              </a>
+            </div>
+            <ToolPreview eager />
           </section>
           <section className="hub-section" aria-labelledby="tool-features">
-            <h2 id="tool-features" className="hub-heading">Tiện ích giúp bạn làm gì?</h2>
+            <h2 id="tool-features" className="hub-heading">Soi giá trên Shopee</h2>
             <div className="hub-tool-features">
-              {shopeePriceFeatures.map(({ title, description }, index) => {
+              {shopeePriceFeatures.map(({ title, summary }, index) => {
                 const Icon = featureIcons[index];
                 return (
                   <article className="hub-tool-feature" key={title}>
-                    <Icon size={24} aria-hidden="true" />
+                    <span className="hub-feature-symbol"><Icon size={25} aria-hidden="true" /></span>
                     <h3>{title}</h3>
-                    <p>{description}</p>
+                    <p>{summary}</p>
                   </article>
                 );
               })}
