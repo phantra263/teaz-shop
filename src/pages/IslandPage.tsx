@@ -5,11 +5,13 @@ import { islandStops, type IslandStopId } from "../data/island";
 import { islandAnimalInteraction, type IslandWildlifePrompt } from "../data/islandInteractions";
 import { islandPlaceName, islandPlacePath, islandPlaces } from "../data/islandPlaces";
 import type { IslandObstacle } from "../lib/islandNavigation";
+import type { TeaPrompt } from "../lib/islandTeaCare";
+import { Droplets, Leaf } from "lucide-react";
 import type { mountIslandScene } from "../lib/islandScene";
 import "./shop.css";
 import "./island.css";
 
-const icons = { pier: Flag, market: ShoppingBag, lab: Wrench, studio: Radio, house: House, grove: Trees, pond: Waves };
+const icons = { pier: Flag, market: ShoppingBag, lab: Wrench, studio: Radio, house: House, grove: Trees, pond: Waves, tea: Leaf };
 const animalIcons = { rabbit: Rabbit, duck: Waves, bird: Bird, butterfly: Flower2 };
 const obstacleMessage: Record<IslandObstacle, string> = {
   tree: "Thân cây chắn đường",
@@ -47,6 +49,7 @@ export default function IslandPage() {
   const [obstacle, setObstacle] = useState<IslandObstacle | null>(null);
   const [nearbyStop, setNearbyStop] = useState<IslandStopId | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [tea, setTea] = useState<TeaPrompt | null>(null);
   const motionRef = useRef(motion);
   const stop = islandStops.find(({ id }) => id === selected) ?? islandStops[0];
   const StopIcon = icons[stop.id];
@@ -72,6 +75,7 @@ export default function IslandPage() {
         },
         onCancelWalk: () => setWalking(false),
         onWildlifeChange: setWildlife,
+        onTeaChange: setTea,
         onObstacle: setObstacle,
         onNearbyStop: (id) => {
           setNearbyStop(id);
@@ -188,12 +192,25 @@ export default function IslandPage() {
                       {previewOpen ? <X size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
                       {previewOpen ? "Đóng xem trước" : "Xem trước"}
                     </button>
-                    <Link className="island-ui-button island-place-primary" to={islandPlacePath(activePlace)}>Xem chi tiết <ArrowRight size={16} aria-hidden="true" /></Link>
+                    <Link className="island-ui-button island-place-primary" to={islandPlacePath(activePlace)}>{activePlace.id === "lab" ? "Xem kệ công cụ" : "Xem chi tiết"} <ArrowRight size={16} aria-hidden="true" /></Link>
                   </div>
                 </aside>
               )}
               <div className="island-area" aria-hidden="true"><StopIcon size={17} /> <span>{stop.name}</span></div>
-              {(wildlife.nearby.length > 0 || wildlife.active) && (
+              {tea && !activePlace && (
+                <div className="island-wildlife" role="group" aria-label="Chăm sóc luống trà">
+                  <p className="island-wildlife-response" role="status">
+                    Luống {tea.row + 1} · {tea.stage === "watering" ? "Đang tưới…" : tea.stage === "harvesting" ? "Đang hái búp…" : tea.stage === "ready" ? "Búp non đã sẵn sàng" : "Chờ tưới"} · Đã hái {tea.harvests} lượt
+                  </p>
+                  {(tea.stage === "dry" || tea.stage === "ready") && (
+                    <button type="button" className="island-ui-button" onClick={() => scene.current?.tendTea(tea.stage === "ready" ? "harvest" : "water")}>
+                      {tea.stage === "ready" ? <Leaf size={17} /> : <Droplets size={17} />}
+                      {tea.stage === "ready" ? "Hái búp trà" : "Tưới luống trà"}
+                    </button>
+                  )}
+                </div>
+              )}
+              {!tea && (wildlife.nearby.length > 0 || wildlife.active) && (
                 <div className="island-wildlife" role="group" aria-label="Tương tác với động vật">
                   {wildlife.active && <p className="island-wildlife-response" role="status">{islandAnimalInteraction[wildlife.active].response}</p>}
                   {wildlife.nearby.map((action, index) => {

@@ -1,6 +1,7 @@
 import { islandLayoutScale } from "../lib/islandTerrain";
 
 const stops = [
+  // Keep the pier first: it supplies the default arrival point.
   { id: "pier", name: "Bến Trà", x: 0, z: 11.1, height: 1.65, description: "Điểm xuất phát của Đảo Trà. Từ đây bạn có thể đi tới các công trình trên đảo.", href: null, action: null },
   { id: "market", name: "Chợ Trà", x: -5.3, z: 2.7, height: 2.9, description: "Ghé các gian hàng để xem sản phẩm TeaZ giới thiệu và tìm bộ sưu tập Shopee.", href: "/#san-pham", action: "Xem sản phẩm" },
   { id: "lab", name: "Xưởng Tool", x: -6.3, z: -3.2, height: 3.4, description: "Tìm hiểu tiện ích TeaZ để xem lịch sử giá và đối chiếu các đợt sale trên Shopee.", href: "/tools", action: "Khám phá tiện ích" },
@@ -8,6 +9,7 @@ const stops = [
   { id: "house", name: "Nhà TeaZ", x: 2.8, z: -4.6, height: 3.75, description: "Xem các dự án và portfolio lập trình của Trà Phan.", href: "/profile", action: "Xem portfolio" },
   { id: "grove", name: "Rừng Gió", x: -13.4, z: -4.1, height: 2.25, description: "Đi dọc bìa rừng để gặp thỏ, gọi chim hoặc đưa tay đón bướm.", href: null, action: null },
   { id: "pond", name: "Đầm Sen", x: 12.4, z: -3.65, height: 1.85, description: "Dừng bên bờ để gọi vịt bơi tới hoặc đón bướm giữa những bụi hoa.", href: null, action: null },
+  { id: "tea", name: "Đồi Trà", x: -0.8, z: -4.85, height: 1.9, description: "Đi giữa các luống, tưới cây rồi hái búp trà non.", href: null, action: null },
 ] as const;
 
 export const islandStops = stops.map((stop) => ({ ...stop, x: stop.x * islandLayoutScale, z: stop.z * islandLayoutScale }));

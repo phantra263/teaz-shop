@@ -1,5 +1,5 @@
 import {
-  BufferGeometry, Color, Float32BufferAttribute, Group, Mesh, MeshStandardMaterial, ShaderMaterial, UniformsLib, UniformsUtils,
+  BufferGeometry, Color, Float32BufferAttribute, Group, Mesh, MeshStandardMaterial, ShaderMaterial, UniformsLib, UniformsUtils, Vector4,
 } from "three";
 import { createIslandStone, createIslandStoneMaterial } from "./islandStone";
 import { islandElevation, islandPond, pondRadiusAt } from "./islandTerrain";
@@ -35,6 +35,7 @@ export function createLotusPond() {
     fog: true,
     uniforms: UniformsUtils.merge([UniformsLib.fog, {
       time: { value: 0 }, silver: { value: new Color("#c0e4d8") }, shoal: { value: new Color("#7aaea0") }, deep: { value: new Color("#245e64") },
+      swimmers: { value: Array.from({ length: 3 }, () => new Vector4()) },
     }]),
     vertexShader: /* glsl */ `
       #include <fog_pars_vertex>
@@ -57,6 +58,7 @@ export function createLotusPond() {
       uniform vec3 silver;
       uniform vec3 shoal;
       uniform vec3 deep;
+      uniform vec4 swimmers[3]; // Pond-local xz and forward velocity.
       varying float shoreDepth;
       varying vec2 waterPoint;
       varying vec3 viewDelta;
@@ -68,10 +70,31 @@ export function createLotusPond() {
         float fractured = smoothstep(0.38, 0.98, sin(dot(p, vec2(-4.9, 4.2)) + drift));
         float depth = smoothstep(0.025, 0.71, shoreDepth + drift * 0.022);
         vec3 color = mix(shoal, deep, depth) * (1.0 + swell * 0.072);
-        float reflection = pow(1.0 - clamp(normalize(viewDelta).y, 0.0, 1.0), 2.2);
-        float glint = smoothstep(0.91, 0.999, ripple) * fractured;
+        float wake = 0.0;
+        float contact = 0.0;
+        for (int i = 0; i < 3; i++) {
+          vec2 offset = p - swimmers[i].xy;
+          float speed = length(swimmers[i].zw);
+          vec2 forward = swimmers[i].zw / max(speed, 0.001);
+          float aft = -dot(offset, forward);
+          float side = abs(dot(offset, vec2(forward.y, -forward.x)));
+          float crest = side - (0.13 + aft * 0.34);
+          wake += exp(-abs(crest) * 30.0) * smoothstep(0.0, 0.23, aft)
+            * (1.0 - smoothstep(0.35, 1.45, aft)) * smoothstep(0.03, 0.65, speed)
+            * (0.7 + 0.3 * sin(aft * 23.0 - time * 3.2));
+          contact = max(contact, exp(-dot(offset, offset) * 15.0));
+        }
+        vec3 normal = normalize(vec3(.055 * drift + .027 * ripple, 1.0, .048 * swell - .02 * ripple));
+        vec3 view = normalize(viewDelta);
+        vec3 reflected = reflect(-view, normal);
+        float fresnel = .06 + .82 * pow(1.0 - clamp(dot(normal, view), 0.0, 1.0), 3.0);
+        float horizon = .16 + .07 * sin(reflected.x * 15.0 + reflected.z * 8.0);
+        vec3 sky = mix(vec3(.08,.19,.14), vec3(.58,.75,.79),
+          smoothstep(horizon - .08, horizon + .12, reflected.y));
+        color = mix(color, sky, fresnel) * (1.0 - contact * .32);
+        float glint = pow(max(dot(reflected, normalize(vec3(.42,.55,-.72))), 0.0), 72.0);
         float strand = 1.0 - smoothstep(0.008, 0.037, abs(shoreDepth - 0.042 - sin(time * 1.25 + drift) * 0.017));
-        color = mix(color, silver, reflection * 0.22 + glint * 0.29 + strand * (0.1 + 0.17 * fractured));
+        color = mix(color, silver, clamp(glint * .64 + wake * .46 + strand * (.08 + .12 * fractured), 0.0, .85));
         gl_FragColor = vec4(color, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -133,6 +156,9 @@ export function createLotusPond() {
   return {
     group,
     update(time: number) { waterMaterial.uniforms.time.value = time; },
+    setSwimmer(index: number, x: number, z: number, vx: number, vz: number) {
+      waterMaterial.uniforms.swimmers.value[index].set(x, z, vx, vz);
+    },
     dispose() {
       [waterGeometry, waterMaterial, bankGeometry, bankMaterial, pebbleGeometry, pebbleMaterial].forEach((resource) => resource.dispose());
     },

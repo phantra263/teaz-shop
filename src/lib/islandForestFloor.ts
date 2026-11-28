@@ -2,7 +2,7 @@ import {
   BufferGeometry, CanvasTexture, Color, DoubleSide, Float32BufferAttribute, InstancedMesh,
   MeshStandardMaterial, Object3D, SRGBColorSpace, Vector3,
 } from "three";
-import { islandCoastRatio, islandElevation, islandGround, islandLandRadius, pondBankDistance } from "./islandTerrain";
+import { islandCoastRatio, islandElevation, islandBounds, islandLandRadius, pondBankDistance } from "./islandTerrain";
 
 export function createMeadowTexture(trees: readonly (readonly [number, number])[]) {
   const canvas = document.createElement("canvas");
@@ -28,8 +28,8 @@ export function createMeadowTexture(trees: readonly (readonly [number, number])[
     ctx.fillRect(x, y, 1 + index % 3, 1 + index % 2);
   }
   trees.forEach(([x, z], index) => {
-    const px = (z / islandGround.z * 0.5 + 0.5) * 512;
-    const py = (0.5 - x / islandGround.x * 0.5) * 512;
+    const px = (z / islandBounds.z * 0.5 + 0.5) * 512;
+    const py = (0.5 - x / islandBounds.x * 0.5) * 512;
     const radius = 18 + (index % 4) * 2;
     const shade = ctx.createRadialGradient(px + 6, py + 5, 1, px + 6, py + 5, radius + 12);
     shade.addColorStop(0, "#203a36b0");

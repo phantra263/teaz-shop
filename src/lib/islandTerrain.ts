@@ -1,16 +1,18 @@
 export const islandLayoutScale = 1.85;
 export const islandGround = { x: 20 * islandLayoutScale, z: 14 * islandLayoutScale };
-export const islandBounds = { x: islandGround.x * 1.06, z: islandGround.z * 1.06 };
+export const islandBounds = { x: islandGround.x * 1.30, z: islandGround.z * 1.38 };
+export const islandMarket = { x: -5.3 * islandLayoutScale, z: 2.7 * islandLayoutScale };
 export const islandPond = { x: 15.1 * islandLayoutScale, z: -4.3 * islandLayoutScale, radius: 3.2 };
 export const islandLandRadius = 0.972;
 
 // Angles on the normalized terrain ellipse, followed by the depth and sharpness of each cove or headland.
 export const islandCoastFeatures = [
-  [0.47, -0.26, 19],
+  [0.39, -0.13, 24],
+  [0.77, 0.32, 8],
   [1.05, 0.055, 11],
   [1.6, -0.09, 20],
   [2.21, -0.24, 14],
-  [2.78, 0.08, 10],
+  [2.78, 0.30, 8],
   [3.45, -0.075, 18],
   [4.02, 0.053, 11],
   [4.57, -0.29, 18],
@@ -63,10 +65,10 @@ function fade(from: number, to: number, value: number) {
 }
 
 const hills = [
-  [-18, 7, 9, 7, 5.1], [11, 12, 7.2, 8, 5.7], [-25, -8, 9, 5.8, 2.6],
-  [-10, -15.5, 10, 7, 7.2], [15, -15.5, 10, 6.4, 5.9], [23, 6.4, 7, 6.5, 4.5],
+  [-31, 8, 8, 6.5, 4.8], [22, 20, 6.8, 5, 4.9], [-25, -8, 9, 5.8, 2.6],
+  [-10, -15.5, 10, 7, 7.2], [15, -15.5, 10, 6.4, 5.9], [32, 9, 6, 5, 3.8],
 ] as const;
-const levelSites = [[-6.3, -4.45], [2.8, -5.95], [6, 0.95], [-6.75, 1.32], [-4.24, 1.32]] as const;
+const levelSites = [[-6.3, -4.45], [2.8, -5.95]] as const;
 
 export function islandElevation(x: number, z: number) {
   const coast = islandCoastRatio(x, z);
@@ -79,9 +81,20 @@ export function islandElevation(x: number, z: number) {
     const dz = (z - hz) / depth;
     height += rise * Math.exp(-1.75 * (dx * dx + dz * dz));
   }
+  // Shape the north hillside into broad planting shelves with rounded risers.
+  if (x > -14 && x < 5 && z < -6 && z > -21) {
+    const field = (1 - fade(4.7, 8.5, Math.abs(x + 4.4))) * (1 - fade(3.4, 7, Math.abs(z + 12.6)));
+    const contour = (-9.53 - z + .55 * Math.sin((x + 8.88) / 2.45)) / 1.04;
+    const step = Math.floor(contour + .5);
+    const shelf = .72 + .34 * (step + fade(.12, .47, contour - step));
+    height += (Math.max(.2, shelf) - height) * field;
+  }
   const byPond = fade(0.33, 2.65, pondBankDistance(x, z));
   const byPier = fade(1.6, 6.5, Math.hypot(x, Math.max(0, 20.9 - z)));
-  let byBuilding = 1;
+  // A shared, level terrace covers the counters, approach and camera orbit.
+  const marketRadius = Math.hypot((x - islandMarket.x) / 10, (z - islandMarket.z) / 8);
+  const studioRadius = Math.hypot((x - 6 * islandLayoutScale) / 12, (z - 2.4 * islandLayoutScale) / 11);
+  let byBuilding = Math.min(fade(0.75, 1.5, marketRadius), fade(0.78, 1.46, studioRadius));
   for (const [siteX, siteZ] of levelSites) {
     const dx = x - siteX * islandLayoutScale;
     const dz = z - siteZ * islandLayoutScale;

@@ -1,5 +1,5 @@
 import { BufferGeometry, Color, Float32BufferAttribute, type Vector3 } from "three";
-import { islandCoastPoint, islandElevation, islandGround, islandLandRadius } from "./islandTerrain";
+import { islandCoastPoint, islandElevation, islandBounds, islandLandRadius } from "./islandTerrain";
 
 const radialSegments = 192;
 
@@ -25,7 +25,7 @@ export function createIslandRelief() {
       shade.copy(grass).lerp(moss, grain * 0.61).lerp(sunlit, Math.min(elevation * 0.095, 0.55));
       positions.push(x, elevation + 0.09, z);
       colors.push(shade.r, shade.g, shade.b);
-      uv.push(z / islandGround.z * 0.5 + 0.5, x / islandGround.x * 0.5 + 0.5);
+      uv.push(z / islandBounds.z * 0.5 + 0.5, x / islandBounds.x * 0.5 + 0.5);
 
       const next = (band - 1) * radialSegments + (segment + 1) % radialSegments + 1;
       const vertex = (band - 1) * radialSegments + segment + 1;
@@ -87,7 +87,7 @@ export function createIslandShore() {
   return geometry;
 }
 
-export function createIslandTrail(points: readonly Vector3[], style = { width: 0.51, center: "#d3b887", edge: "#a6a36b" }) {
+export function createIslandTrail(points: readonly Vector3[], style = { width: 0.51, center: "#d3b887", edge: "#a6a36b" }, extraWidths?: readonly number[]) {
   const geometry = new BufferGeometry();
   const positions: number[] = [];
   const colors: number[] = [];
@@ -101,7 +101,7 @@ export function createIslandTrail(points: readonly Vector3[], style = { width: 0
     const before = points[Math.max(0, index - 1)];
     const after = points[Math.min(points.length - 1, index + 1)];
     const length = Math.hypot(after.x - before.x, after.z - before.z);
-    const width = style.width * (1 + 0.145 * Math.sin(z * 1.7 + x * 0.45));
+    const width = style.width * (1 + 0.145 * Math.sin(z * 1.7 + x * 0.45)) + (extraWidths?.[index] ?? 0);
     sections.forEach((offset, section) => {
       const px = x + (after.z - before.z) / length * width * offset;
       const pz = z - (after.x - before.x) / length * width * offset;

@@ -1,9 +1,10 @@
 import {
-  BoxGeometry, CircleGeometry, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial,
-  RingGeometry, SphereGeometry, MathUtils, Vector3, type Scene,
+  BoxGeometry, Group, Mesh, MeshStandardMaterial,
+  SphereGeometry, MathUtils, Vector3, type Scene,
 } from "three";
 import { islandAnimalActions, type IslandAnimalAction } from "../data/islandInteractions";
 import { islandStops } from "../data/island";
+import { createIslandLotuses } from "./islandLotuses";
 import { createIslandAnimals } from "./islandAnimals";
 import { createLotusPond, pondWaterHeight } from "./islandPond";
 import { islandElevation, islandLayoutScale, islandPond, pondBankDistance, pondRadiusAt } from "./islandTerrain";
@@ -14,14 +15,14 @@ export function createIslandWildlife(scene: Scene) {
   const sphere = new SphereGeometry(1, 12, 8);
   const box = new BoxGeometry();
   const animals = createIslandAnimals();
-  const ring = new RingGeometry(1, 1.025, 48);
-  const pad = new CircleGeometry(1, 17, 0.32, Math.PI * 1.83);
+  const lotuses = createIslandLotuses();
   const materials = new Map<string, MeshStandardMaterial>();
   const lotusPond = createLotusPond();
   const pond = lotusPond.group;
   habitat.add(pond);
+  pond.add(lotuses.group);
 
-  function shape(parent: Group, geometry: typeof sphere | typeof box | typeof pad, color: string, x: number, y: number, z: number, w: number, h: number, d: number) {
+  function shape(parent: Group, geometry: typeof sphere | typeof box, color: string, x: number, y: number, z: number, w: number, h: number, d: number) {
     let material = materials.get(color);
     if (!material) {
       material = new MeshStandardMaterial({ color, roughness: 0.84 });
@@ -34,25 +35,6 @@ export function createIslandWildlife(scene: Scene) {
     return mesh;
   }
 
-  const rippleMaterials: MeshBasicMaterial[] = [];
-
-  for (let index = 0; index < 28; index++) {
-    const angle = index * 2.39996;
-    const radius = pondRadiusAt(angle) * (0.27 + (index % 8) * 0.073);
-    const x = Math.cos(angle) * radius;
-    const z = Math.sin(angle) * radius;
-    const width = 0.16 + (index % 4) * 0.042;
-    const lilyPad = shape(pond, pad, index % 3 ? "#51864e" : "#79a35c", x, pondWaterHeight + 0.011 + index * 0.0003, z, width, width * 0.84, 1);
-    lilyPad.rotation.set(-Math.PI / 2, 0, angle);
-    lilyPad.receiveShadow = true;
-    if (index % 3) continue;
-    for (let petal = 0; petal < 5; petal++) {
-      const direction = petal * Math.PI * 0.4;
-      const piece = shape(pond, sphere, "#e8a2b9", x + Math.cos(direction) * 0.064, 0.173, z + Math.sin(direction) * 0.064, 0.09, 0.043, 0.044);
-      piece.rotation.y = -direction;
-    }
-    shape(pond, sphere, "#f3ce68", x, 0.204, z, 0.051, 0.027, 0.051);
-  }
 
   for (const base of [0.1, 1.26, 2.05, 4.14, 5.13]) {
     for (let stalk = 0; stalk < 6; stalk++) {
@@ -69,15 +51,7 @@ export function createIslandWildlife(scene: Scene) {
   const ducks = Array.from({ length: 3 }, (_, index) => {
     const model = animals.duck(index);
     pond.add(model.root);
-    const wake = [0, 1].map(() => {
-      const material = new MeshBasicMaterial({ color: "#e0f3e8", transparent: true, opacity: 0.36, depthWrite: false });
-      rippleMaterials.push(material);
-      const ripple = new Mesh(ring, material);
-      ripple.rotation.x = -Math.PI / 2;
-      pond.add(ripple);
-      return ripple;
-    });
-    return { ...model, wake };
+    return { ...model, velocity: new Vector3() };
   });
 
   const rabbits = Array.from({ length: 3 }, (_, index) => animals.rabbit(index));
@@ -147,27 +121,34 @@ export function createIslandWildlife(scene: Scene) {
       if (encounter.leaving && encounter.influence <= 0) encounter = undefined;
     }
     lotusPond.update(time);
-    ducks.forEach(({ root: duck, head, wake }, index) => {
+    lotuses.group.position.y = pondWaterHeight + .006 * Math.sin(time * 1.4);
+    lotuses.group.rotation.y = .003 * Math.sin(time * .74);
+    ducks.forEach(({ root: duck, head, velocity }, index) => {
       const interaction = reaction("duck");
       const weight = interaction ? MathUtils.smoothstep(interaction.influence, 0, 1) : 0;
-      const patrol = time * 0.72 - index * 0.5 + 2.0;
+      const stroke = time * (3.3 + index * .16) + index * 2.1;
+      const patrol = time * .31 + .08 * Math.sin(time * .62 + index) - index * .56 + 2;
       const bank = interaction ? Math.atan2(interaction.center.z - islandPond.z, interaction.center.x - islandPond.x) : patrol;
       const angle = facing(interaction && !interaction.leaving ? interaction.duckAngles[index] : patrol, bank + (index - 1) * 0.24, weight);
       const radius = MathUtils.lerp(pondRadiusAt(angle) * (0.65 + index * 0.035), pondRadiusAt(angle) - 0.38, weight);
-      duck.position.set(Math.cos(angle) * radius, pondWaterHeight - 0.009 + Math.sin(time * 5.4 + index) * 0.028, Math.sin(angle) * radius);
-      duck.rotation.y = facing(-angle, Math.PI / 2 - bank, weight);
-      duck.rotation.z = Math.sin(time * 4.4 + index) * 0.041;
-      head.rotation.x = Math.sin(time * 3.2 + index) * 0.095 + weight * Math.sin((interaction?.elapsed ?? 0) * 6.0) * 0.24;
-      head.rotation.y = Math.sin(time * 1.4 + index * 1.6) * 0.17;
-      wake.forEach((ripple, layer) => {
-        const wave = ((interaction?.elapsed ?? time) * 1.5 + layer * 0.5 + index * 0.17) % 1;
-        const behind = angle - 0.135 - wave * 0.31;
-        const wakeRadius = Math.min(radius, pondRadiusAt(behind) - 0.31);
-        ripple.position.set(Math.cos(behind) * wakeRadius, pondWaterHeight + 0.008, Math.sin(behind) * wakeRadius);
-        ripple.scale.set(0.13 + wave * 0.24, 0.095 + wave * 0.2, 1);
-        ripple.rotation.z = -behind + 0.32;
-        ripple.material.opacity = (1 - wave) * 0.49;
-      });
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      if (delta > 0) {
+        const blend = 1 - Math.exp(-7 * delta);
+        velocity.x = MathUtils.lerp(velocity.x, (x - duck.position.x) / delta, blend);
+        velocity.z = MathUtils.lerp(velocity.z, (z - duck.position.z) / delta, blend);
+      }
+      const speed = Math.min(1, velocity.length());
+      const heading = speed > .05 ? Math.atan2(velocity.x, velocity.z) : weight > .5 ? Math.PI / 2 - bank : duck.rotation.y;
+      duck.rotation.y = delta ? facing(duck.rotation.y, heading, 1 - Math.exp(-5 * delta)) : -angle;
+      duck.position.set(x, pondWaterHeight - .028 + Math.sin(stroke) * .009, z);
+      duck.rotation.z = Math.sin(stroke) * (.009 + speed * .021);
+      duck.rotation.x = .018 * speed * Math.sin(stroke * 2);
+      const dabble = Math.pow(Math.max(0, Math.sin(time * .86 + index * 2.2)), 12);
+      head.rotation.x = .055 * Math.sin(stroke) + dabble * .65 + weight * .13;
+      head.position.y = .274 - dabble * .084;
+      head.rotation.y = .15 * Math.sin(time * 1.1 + index * 1.8);
+      lotusPond.setSwimmer(index, x, z, velocity.x, velocity.z);
     });
     rabbits.forEach(({ root, head, ears, hind, front }, index) => {
       const cycle = time * 1.48 + index * 0.71;
@@ -258,9 +239,9 @@ export function createIslandWildlife(scene: Scene) {
     dispose() {
       animals.dispose();
       lotusPond.dispose();
-      [sphere, box, ring, pad].forEach((geometry) => geometry.dispose());
+      lotuses.dispose();
+      [sphere, box].forEach((geometry) => geometry.dispose());
       materials.forEach((material) => material.dispose());
-      rippleMaterials.forEach((material) => material.dispose());
     },
   };
 }

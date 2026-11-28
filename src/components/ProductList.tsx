@@ -66,6 +66,9 @@ export function ProductList() {
                   </span>
                 </div>
               </a>
+              <a className="hub-review-link" href={`/review/${product.slug}.html`} aria-label={`Ghi chú review: ${product.name}`}>
+                Ghi chú review <ArrowUpRight size={15} aria-hidden="true" />
+              </a>
               {product.shopeeUrl && (
                 <a
                   className="hub-review-link"

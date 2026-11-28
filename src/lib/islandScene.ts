@@ -2,7 +2,7 @@ import {
   AnimationClip, AnimationMixer, BoxGeometry, CapsuleGeometry, CatmullRomCurve3, Color, ConeGeometry, CylinderGeometry, DirectionalLight,
   Fog, Group, HemisphereLight, InstancedMesh, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PCFShadowMap, PlaneGeometry, ShaderMaterial,
   NumberKeyframeTrack, OrthographicCamera, PerspectiveCamera, Plane, Raycaster, Scene, SphereGeometry, Spherical,
-  Vector2, Vector3, WebGLRenderer, type BufferGeometry,
+  TubeGeometry, Vector2, Vector3, WebGLRenderer, type BufferGeometry,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { islandStops, type IslandStopId } from "../data/island";
@@ -16,7 +16,14 @@ import { createIslandLeaves, type FoliageCluster } from "./islandLeaves";
 import { createIslandNavigation, type IslandObstacle } from "./islandNavigation";
 import { createIslandRelief, createIslandShore, createIslandTrail } from "./islandRelief";
 import { createIslandStone, createIslandStoneMaterial } from "./islandStone";
-import { islandCoastPoint, islandCoastRatio, islandElevation, islandGround, islandLandRadius, islandLayoutScale, islandPond, pondRadiusAt } from "./islandTerrain";
+import { islandCoastPoint, islandCoastRatio, islandElevation, islandGround, islandLandRadius, islandLayoutScale, islandMarket, islandPond, pondRadiusAt } from "./islandTerrain";
+import { products } from "../data/products";
+import { createWorkshop } from "./islandWorkshop";
+import { createMarketStall } from "./islandMarket";
+import { createVideoStudio } from "./islandVideoStudio";
+import { createTeaCare, type TeaAction, type TeaPrompt } from "./islandTeaCare";
+import { createTeaWork } from "./islandTeaWork";
+import { createTeaHouse } from "./islandTeaHouse";
 import { createIslandSky, islandSunDirection } from "./islandSky";
 import { createIslandWater } from "./islandWater";
 import { createIslandWildlife } from "./islandWildlife";
@@ -33,10 +40,11 @@ export function mountIslandScene(
   map: HTMLCanvasElement | null,
   mapPlayer: HTMLSpanElement | null,
   markers: Readonly<Partial<Record<IslandStopId, HTMLButtonElement>>>,
-  { onArrive, onCancelWalk, onWildlifeChange, onObstacle, onNearbyStop, initialMotion, initialStop }: {
+  { onArrive, onCancelWalk, onWildlifeChange, onTeaChange, onObstacle, onNearbyStop, initialMotion, initialStop }: {
     onArrive: (id: IslandStopId) => void;
     onCancelWalk: () => void;
     onWildlifeChange: (prompt: IslandWildlifePrompt) => void;
+    onTeaChange: (prompt: TeaPrompt | null) => void;
     onObstacle: (obstacle: IslandObstacle | null) => void;
     onNearbyStop: (id: IslandStopId | null) => void;
     initialMotion: boolean;
@@ -137,28 +145,42 @@ export function mountIslandScene(
   const mapPaths: Vector3[][] = [];
   const pierStart = islandStops[0].z + 0.15;
   const pierEnd = islandCoastPoint(Math.PI / 2).z + 1.7;
+  const kioskX = -2.2;
+  const kioskZ = pierStart - 3.2;
   const grassClearings: [number, number, number, number][] = [
     [0, (pierStart + pierEnd) / 2, 1.27, (pierEnd - pierStart) / 2],
+    [kioskX, kioskZ, 1.5, 1.2],
   ];
 
   function path(points: readonly (readonly [number, number])[]) {
     const curve = new CatmullRomCurve3(points.map(([x, z]) => new Vector3(x * islandLayoutScale, 0, z * islandLayoutScale)));
     const samples = curve.getSpacedPoints(Math.ceil(curve.getLength() / 0.18));
+    const extraWidths = samples.map(({ x, z }, index) => {
+      const radius = Math.hypot((x - 6 * islandLayoutScale) / 7, (z - 2.4 * islandLayoutScale) / 4);
+      const t = Math.max(0, 1 - radius * radius);
+      const extra = 1.1 * t * t;
+      if (extra > .08) {
+        const tangent = curve.getTangentAt(index / (samples.length - 1));
+        for (const side of [-1, 1]) pathPoints.push(new Vector3(x + side * tangent.z * extra, 0, z - side * tangent.x * extra));
+      }
+      return extra;
+    });
     pathPoints.push(...samples);
     mapPaths.push(samples);
-    const shape = createIslandTrail(samples);
+    const shape = createIslandTrail(samples, undefined, extraWidths);
     geometries.add(shape);
     const strip = new Mesh(shape, pathMaterial);
     strip.receiveShadow = true;
     scene.add(strip);
   }
   path([[0, 11.5], [0.5, 8.4], [0, 5], [-1.3, 2.2], [-2.8, 0.2], [-6.3, -3.2]]);
-  path([[-7.15, 2.7], [-5.3, 2.7], [-2.8, 0.2], [1.3, 0.1], [6, 2.4], [8, 2.55]]);
+  path([[-13.6, 4.5], [-10.0, 3.5], [-7.4, 2.8], [-5.3, 2.7], [-2.8, 0.2], [1.3, 0.1], [6, 2.4], [8, 2.55]]);
   path([[1.35, 0.15], [2.65, -1.8], [2.8, -4.6], [3.1, -6.6]]);
+  path([[2.8, -4.6], [1.65, -4.22], [0.4, -4.38], [-0.8, -4.85]]);
   path([[-6.3, -3.2], [-8.2, -2.7], [-10.7, -3.3], [-13.4, -4.1], [-15.1, -2.9]]);
   path([[8, 2.55], [10.1, 0.7], [11.5, -0.4], [12.4, -3.65]]);
 
-  const mapX = (x: number) => 50 + x / islandGround.x * 44;
+  const mapX = (x: number) => 54 + x / islandGround.x * 40;
   const mapY = (z: number) => 50 + z / islandGround.z * 40;
   const mapContext = map?.getContext("2d");
   if (mapContext && map) {
@@ -269,8 +291,8 @@ export function mountIslandScene(
   }
 
   const treeLocations: (readonly [number, number])[] = [
-    [-10.7, 2.8], [-10.2, -0.8], [-9.4, -4.5], [-8.4, -6.1], [-3.4, -7], [-0.6, -7.55], [5.9, -6.7], [8.7, -5.2],
-    [10.8, -2.3], [10.7, 1.1], [10.5, 3.5], [8.8, 5.9], [4.7, 7.15], [-3.6, 7.15], [-7.8, 5.3], [0.7, -3.2], [-3.1, 4.4], [4.1, 3.8],
+    [-10.7, 2.8], [-10.2, -0.8], [-9.4, -4.5], [-8.4, -6.1], [-6.4, -9.1], [1.4, -8.6], [5.9, -6.7], [8.7, -5.2],
+    [10.8, -2.3], [18.6, 3.8], [16.9, 6.4], [14.5, 9.1], [8.1, 10.7], [-3.6, 7.15], [-18.1, 4.8], [0.7, -3.2], [-19.4, 2.3], [10.5, 11.8],
     [-16.9, -3.9], [-15.4, -6.3], [-12.7, -7.4], [-16.8, -0.9], [-15.6, 2.5], [-13.8, 6.3], [-6.8, 9.7], [-2.4, 10.5],
     [3.5, 10.4], [9.2, 9], [13.7, 6.3], [14.4, 3.5], [18.1, 0.3], [14.3, -7.6], [10.4, -8.9], [5.1, -10.3], [0.7, -10.4],
   ].map(([x, z]) => [x * islandLayoutScale, z * islandLayoutScale] as const)
@@ -284,7 +306,7 @@ export function mountIslandScene(
 
   const pines = [[-17.8, 1.2], [-12, 8.7], [-8, -10.1], [-11.2, -9.5], [6.3, 11], [11.4, 7.4], [17.8, 1.2], [11.8, -8.7],
     [-15.2, -4.5], [-14.5, -8.3], [-13.4, 0.5], [-11.5, 3.8], [-6.2, -7.2], [-4.5, -10.3], [1.9, -9.1], [6.5, -8.9],
-    [7.7, -2.7], [12, 2.4], [9.7, 5.9], [4.8, 6], [-6.5, 6.5], [-3.7, 3.5], [2, 4.7], [2.7, 8.4]];
+    [8.4, -4.0], [17.1, 4.7], [12.2, 10.4], [6.4, 10.2], [-16.2, 6.8], [-19.1, 0.3], [1.4, 7.7], [2.7, 8.4]];
   for (const [index, [localX, localZ]] of pines.entries()) {
     const x = localX * islandLayoutScale;
     const z = localZ * islandLayoutScale;
@@ -327,24 +349,29 @@ export function mountIslandScene(
 
   const teaOrigin = { x: -4.8 * islandLayoutScale, z: -5.15 * islandLayoutScale };
   const teaBeds: Vector3[] = [];
+  const teaRows: Vector3[][] = [];
   const teaCanopies: FoliageCluster[][] = [[], []];
   const teaField = new Group();
   scene.add(teaField);
   const teaStem = new CylinderGeometry(0.35, 1, 1, 7);
   const teaStemMaterial = new MeshStandardMaterial({ color: "#766345", roughness: 0.97 });
-  const teaStems = new InstancedMesh(teaStem, teaStemMaterial, 4 * 8 * 3);
+  const rowCount = 7, plantsPerRow = 16;
+  const teaStems = new InstancedMesh(teaStem, teaStemMaterial, rowCount * plantsPerRow * 3);
   teaStems.receiveShadow = true;
   teaField.add(teaStems);
   const teaTransform = new Object3D();
   let stemsPlanted = 0;
-  for (let row = 0; row < 4; row++) {
+  for (let row = 0; row < rowCount; row++) {
     const centers: Vector3[] = [];
-    for (let plant = 0; plant < 8; plant++) {
-      const x = teaOrigin.x + plant * 0.59 + row % 2 * 0.24 + Math.sin(row * 2.17 + plant * 1.4) * 0.052;
-      const z = teaOrigin.z - row * 0.77 + Math.sin(plant * 0.54 + row * 0.2) * 0.245;
+    const shoots: Vector3[] = [];
+    teaRows.push(shoots);
+    for (let plant = 0; plant < plantsPerRow; plant++) {
+      const x = teaOrigin.x + plant * .57 + row * .08;
+      const z = teaOrigin.z - row * 1.04 + .55 * Math.sin(plant / 4.3 + row * .08);
       const growth = 0.94 + Math.sin(plant * 2.7 + row * 3.1) * 0.16;
       const groundY = 0.09 + islandElevation(x, z);
       centers.push(new Vector3(x, 0, z));
+      shoots.push(new Vector3(x, groundY + .49 * growth, z));
       for (let stem = 0; stem < 3; stem++) {
         const angle = stem * 2.39996 + plant * 0.82 + row;
         const dx = Math.cos(angle);
@@ -355,7 +382,7 @@ export function mountIslandScene(
         teaTransform.updateMatrix();
         teaStems.setMatrixAt(stemsPlanted++, teaTransform.matrix);
         teaCanopies[(stem + row) % 2].push({ center: new Vector3(x + dx * 0.135, groundY + (stem === 0 ? 0.39 : 0.27) * growth, z + dz * 0.128),
-          spread: new Vector3(0.147 * growth, 0.102 * growth, 0.148 * growth) });
+          spread: new Vector3(.215 * growth, .135 * growth, .19 * growth) });
       }
     }
     const curve = new CatmullRomCurve3(centers);
@@ -369,6 +396,8 @@ export function mountIslandScene(
   }
   leaves.plant(teaField, teaCanopies[0], "#4b8444", 0.51);
   leaves.plant(teaField, teaCanopies[1], "#76a04a", 0.47);
+  const teaCare = createTeaCare(teaRows, onTeaChange);
+  teaField.add(teaCare.group);
 
   const flowerPatches: FlowerPatch[] = [
     { x: teaOrigin.x - 0.55, z: teaOrigin.z - 1.35, radius: 0.78, count: 24 },
@@ -415,8 +444,8 @@ export function mountIslandScene(
       placeStone(index + 2, outlying.x, outlying.z, size * 0.92, size * 0.68, size * 0.65, -1.73);
     }
   }
-  const outcrops = [[4.2, 16.5, 2.05], [-4.7, 15.5, 1.2], [8.6, 13.3, 2.8], [-12.4, 9.8, 2.15], [-18.5, 1.9, 2.45], [-26.4, -11.8, 2.6],
-    [-7.2, -15.8, 2.6], [10.1, -14.4, 2.7], [19.6, -13.1, 1.6], [22.2, 7.2, 2.1], [30.3, -2.6, 1.4], [29.3, 3.8, 1.8]];
+  const outcrops = [[4.2, 16.5, 2.05], [-4.7, 15.5, 1.2], [21.8, 19.5, 2.8], [-29.5, 10.8, 2.15], [-33.2, 4.1, 2.45], [-26.4, -11.8, 2.6],
+    [-13.9, -16.1, 2.2], [10.1, -14.4, 2.7], [19.6, -13.1, 1.6], [31.5, 9.7, 2.1], [30.3, -2.6, 1.4], [29.3, 3.8, 1.8]];
   outcrops.forEach(([x, z, size], index) => {
     if (islandCoastRatio(x, z) > 0.925) return;
     placeStone(index, x, z, size, size * (0.74 + index % 3 * 0.11), size * 0.69);
@@ -425,12 +454,33 @@ export function mountIslandScene(
   });
 
   const plankCount = Math.ceil((pierEnd - pierStart) / 0.36);
+  const plankTones = ["#aa7951", "#aa805b", "#926649", "#b68a60", "#9c7252"];
   water.setPier(pierStart, pierStart + (plankCount - 1) * 0.36 + 0.17, 0.19);
   for (let index = 0; index < plankCount; index++) {
     const z = pierStart + index * 0.36;
-    block(scene, index % 2 ? "#ac784e" : "#966039", 0, 0.27, z, 2.2, 0.16, 0.34);
+    block(scene, plankTones[index % plankTones.length], 0, 0.27, z, 2.2, 0.16, 0.34);
     if (index % 3 === 0) for (const side of [-1, 1]) block(scene, "#675042", side * 0.94, -0.28, z, 0.17, 1.53, 0.2);
   }
+  // Keep the side facing the moored boat open for boarding.
+  const railSpans = Math.floor((plankCount - 1) / 6);
+  if (railSpans > 0) {
+    const ropePoints: Vector3[] = [];
+    for (let i = 0; i <= railSpans; i++) {
+      const z = pierStart + i * 2.16;
+      block(scene, "#78563b", -.94, .73, z, .14, .84, .14);
+      block(scene, "#c5a57b", -.94, 1.06, z, .16, .13, .16);
+      ropePoints.push(new Vector3(-.94, 1.08, z));
+      if (i < railSpans) ropePoints.push(new Vector3(-.94, .84, z + 1.08));
+    }
+    solid(new TubeGeometry(new CatmullRomCurve3(ropePoints), railSpans * 12, .026, 5, false), "#bba27a", scene, 0, 0, 0);
+    navigation.addSolid("building", -.94, pierStart + railSpans * 1.08, .08, railSpans * 1.08);
+  }
+
+  const teaHouse = createTeaHouse();
+  teaHouse.group.position.set(kioskX, islandElevation(kioskX, kioskZ), kioskZ);
+  teaHouse.group.rotation.y = .32;
+  scene.add(teaHouse.group);
+  navigation.addSolid("building", kioskX, kioskZ, 1.17, .63, teaHouse.group.rotation.y);
   const boat = new Group();
   boat.position.set(2.12, -1.25, pierEnd - 0.6);
   water.update(0, boat.position);
@@ -489,29 +539,33 @@ export function mountIslandScene(
     return group;
   }
 
-  const lab = cabin(-6.3, -4.45, "#f1dfb3", "#3e7771");
-  block(lab, "#294951", 0, 1.55, 1.11, 1.14, 0.49, 0.14);
-  [0.13, 0.2, 0.14, 0.31].forEach((height, index) => block(lab, "#a9e3b3", -0.35 + index * 0.22, 1.36 + height / 2, 1.19, 0.13, height, 0.028));
+  const lab = createWorkshop();
+  const labX = -6.3 * islandLayoutScale;
+  const labZ = -4.45 * islandLayoutScale;
+  lab.group.position.set(labX, 0.09 + islandElevation(labX, labZ), labZ);
+  scene.add(lab.group);
+  navigation.addSolid("building", labX, labZ - 0.18, 1.94, 1.02);
+  grassClearings.push([labX, labZ, 2.15, 1.45]);
   const house = cabin(2.8, -5.95, "#ecd1a0", "#be7951");
   block(house, "#875e4e", 0.79, 2.34, -0.43, 0.33, 0.9, 0.35);
-  const media = cabin(6, 0.95, "#ead8af", "#7776a0");
-  block(media, "#56716e", 0.72, 2.72, 0, 0.08, 0.95, 0.08);
-  solid(foliage, "#f3cc8a", media, 0.72, 3.21, 0).scale.setScalar(0.17);
+  const studio = createVideoStudio();
+  const studioX = 6 * islandLayoutScale;
+  const studioZ = 0.65 * islandLayoutScale;
+  studio.group.position.set(studioX, .09 + islandElevation(studioX, studioZ), studioZ);
+  scene.add(studio.group);
+  navigation.addSolid("building", studioX, studioZ, 2.12, 1.05);
+  grassClearings.push([studioX, studioZ, 2.28, 1.25]);
 
-  for (const [index, localX] of [-6.75, -4.24].entries()) {
-    const x = localX * islandLayoutScale;
-    const z = 1.32 * islandLayoutScale;
-    navigation.addSolid("building", x, z + 0.07, 0.94, 0.73);
-    grassClearings.push([x, z, 1.03, 0.92]);
-    const stall = new Group();
-    stall.position.set(x, 0.09 + islandElevation(x, z), z);
-    scene.add(stall);
-    const fabric = index ? "#d8965f" : "#669277";
-    for (const dx of [-0.87, 0.87]) for (const dz of [-0.62, 0.62]) block(stall, "#8b6549", dx, 0.93, dz, 0.13, 1.82, 0.13);
-    block(stall, "#b48758", 0, 0.53, 0.18, 1.84, 0.2, 0.91);
-    for (let strip = 0; strip < 6; strip++) block(stall, strip % 2 ? "#f4dfb8" : fabric, -0.87 + strip * 0.346, 1.88, 0.08, 0.346, 0.14, 1.67);
-    for (let boxIndex = 0; boxIndex < 3; boxIndex++) block(stall, boxIndex % 2 ? "#d49e65" : "#808d60", -0.57 + boxIndex * 0.48, 0.76, 0.15, 0.35, 0.26, 0.38);
-  }
+  const marketStalls = products.map((product, index) => {
+    const x = islandMarket.x + (index - (products.length - 1) / 2) * 3.25;
+    const z = islandMarket.z - 3.6;
+    const stall = createMarketStall(product);
+    stall.group.position.set(x, .09 + islandElevation(x, z), z);
+    scene.add(stall.group);
+    navigation.addSolid("building", x, z + .08, 1.08, .57);
+    grassClearings.push([x, z, 1.25, .92]);
+    return stall;
+  });
 
   const player = new Group();
   const spawn = islandStops.find(({ id }) => id === initialStop) ?? islandStops[0];
@@ -571,6 +625,11 @@ export function mountIslandScene(
     solid(smooth, boots, leg, 0, -0.326, 0.046).scale.set(0.092, 0.066, 0.135);
     solid(smooth, "#d4bc96", leg, 0, -0.371, 0.047).scale.set(0.093, 0.031, 0.134);
   }
+  const teaWork = createTeaWork(teaRows, traveler, {
+    water: (row, from) => { teaCare.tendRow(row, "water", from); },
+    harvest: (row, from) => { teaCare.tendRow(row, "harvest", from); },
+  });
+  scene.add(teaWork.group);
   const contactGeometry = new PlaneGeometry(0.95, 0.72);
   const contactMaterial = new ShaderMaterial({
     transparent: true,
@@ -656,6 +715,7 @@ export function mountIslandScene(
   let hasGoal = false;
   let targetStop: IslandStopId | undefined;
   let arrived: IslandStopId | undefined = spawn.id;
+  let nearTea = false;
   let nearbyStop: IslandStopId | null = null;
   let pointerStart: { id: number; button: number; x: number; y: number } | undefined;
   let frameBefore = 0;
@@ -707,6 +767,7 @@ export function mountIslandScene(
   }
 
   function setDestination(x: number, z: number, stop?: IslandStopId) {
+    teaWork.stop();
     const edge = Math.max(1, islandCoastRatio(x, z) / (islandLandRadius - 0.018));
     const route = navigation.route(player.position, { x: x / edge, z: z / edge });
     const destination = route?.pop();
@@ -817,6 +878,7 @@ export function mountIslandScene(
     movement.set(0, 0, 0);
 
     if (keys.size) {
+      teaWork.stop();
       hasGoal = false;
       waypoints.length = 0;
       if (targetStop) {
@@ -832,6 +894,16 @@ export function mountIslandScene(
         if (direction) movement.addScaledVector(right, direction[0]).addScaledVector(heading, direction[1]);
       }
       movement.normalize().multiplyScalar(delta * 5.7);
+    } else if (!hasGoal && !teaWork.active && !wildlife.activeAction && nearTea && animateWeather) {
+      teaWork.start();
+    }
+    if (teaWork.active && !keys.size) {
+      const steer = teaWork.steer(player.position, delta, animateWeather);
+      if (steer) {
+        movement.set(steer.x - player.position.x, 0, steer.z - player.position.z);
+        if (movement.length() < 0.08) movement.set(0, 0, 0);
+        else movement.normalize().multiplyScalar(delta * steer.speed);
+      }
     } else if (hasGoal) {
       movement.subVectors(waypoints[0] ?? target, player.position);
       movement.y = 0;
@@ -860,8 +932,17 @@ export function mountIslandScene(
       const dz = player.position.z - pz;
       isWalking = dx * dx + dz * dz > 0.00001;
       player.position.y = 0.16 + islandElevation(player.position.x, player.position.z);
-      const turn = (isWalking ? Math.atan2(dx, dz) : Math.atan2(movement.x, movement.z)) - player.rotation.y;
+      const look = teaWork.look();
+      const headingTurn = look
+        ? Math.atan2(look.x - player.position.x, look.z - player.position.z)
+        : isWalking ? Math.atan2(dx, dz) : Math.atan2(movement.x, movement.z);
+      const turn = headingTurn - player.rotation.y;
       player.rotation.y += Math.atan2(Math.sin(turn), Math.cos(turn)) * (1 - Math.exp(-17 * delta));
+    }
+    const look = teaWork.look();
+    if (look && !attempted) {
+      const turn = Math.atan2(look.x - player.position.x, look.z - player.position.z) - player.rotation.y;
+      player.rotation.y += Math.atan2(Math.sin(turn), Math.cos(turn)) * (1 - Math.exp(-12 * delta));
     }
     if (hit) {
       bump(hit);
@@ -888,6 +969,7 @@ export function mountIslandScene(
       activeAction = nextAction;
     }
     mixer.update(delta);
+    teaWork.pose(delta, animateWeather);
     if (dustTime > 0) {
       dustTime = Math.max(0, dustTime - delta);
       const progress = 1 - dustTime / 0.44;
@@ -922,6 +1004,7 @@ export function mountIslandScene(
     }
 
     const near = islandStops.find(({ x, z }) => Math.hypot(x - player.position.x, z - player.position.z) < 0.75);
+    nearTea = near?.id === "tea";
     if (near && arrived !== near.id && !hasGoal) onArrive(near.id);
     arrived = near && !hasGoal ? near.id : undefined;
     const front = hasGoal ? null : islandStops.find(({ id, x, z }) => Math.hypot(x - player.position.x, z - player.position.z) < (id === nearbyStop ? 2.75 : 1.85))?.id ?? null;
@@ -946,6 +1029,7 @@ export function mountIslandScene(
       }
     }
     wildlife.update(weatherTime, Math.min(frameTime, 0.25), player.position);
+    teaCare.update(delta, player.position, closeView && !isWalking && !hasGoal && !teaWork.active, animateWeather);
     if (!wildlife.activeAction) gestureHeading = undefined;
     publishWildlife({
       active: closeView ? wildlife.activeAction : null,
@@ -1004,6 +1088,7 @@ export function mountIslandScene(
 
   return {
     interact,
+    tendTea(action: TeaAction) { teaCare.act(action, player.position); },
     setMotion(enabled: boolean) { animateWeather = enabled; },
     setCloseView(enabled: boolean) {
       if (enabled === closeView) return;
@@ -1057,10 +1142,16 @@ export function mountIslandScene(
       conifers.dispose();
       flowers.dispose();
       teaStems.dispose();
+      teaCare.dispose();
+      teaWork.dispose();
       teaStem.dispose();
       teaStemMaterial.dispose();
       ferns.dispose();
       meadowTexture?.dispose();
+      lab.dispose();
+      teaHouse.dispose();
+      studio.dispose();
+      marketStalls.forEach(stall => stall.dispose());
       bark.dispose();
       pathMaterial.dispose();
       stoneMaterial.dispose();

@@ -47,10 +47,12 @@ export default function IslandPlacePage() {
         {place && (
           <section className="island-place-entries" aria-label={`Nội dung ${name}`}>
             {place.entries.map((entry) => (
-              <article key={entry.title} className="island-place-entry">
+              <article key={entry.title} className={place.id === "lab" ? "island-place-entry island-tool-exhibit" : "island-place-entry"}>
+                {entry.cover && <img className="island-market-cover" src={entry.cover} alt="" width={place.id === "lab" ? 1280 : 405} height={place.id === "lab" ? 800 : 720} loading="lazy" />}
                 <h2>{entry.title}</h2>
                 <p>{entry.description}</p>
                 {entry.link && <PlaceLink link={entry.link} />}
+                {entry.notesUrl && <a className="island-market-notes" href={entry.notesUrl}>Đọc ghi chú review</a>}
               </article>
             ))}
           </section>

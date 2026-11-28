@@ -3,7 +3,7 @@ import { shopeePriceFeatures, shopeePriceTool } from "./tools";
 import { islandStops, type IslandStopId } from "./island";
 
 type PlaceLink = { label: string; href: string; sponsored?: boolean };
-type PlaceEntry = { title: string; description: string; link?: PlaceLink };
+type PlaceEntry = { title: string; description: string; cover?: string; notesUrl?: string; link?: PlaceLink };
 type ContentStop = Extract<IslandStopId, "market" | "lab" | "studio" | "house">;
 
 export type IslandPlace = {
@@ -20,14 +20,18 @@ export const islandPlaces: readonly IslandPlace[] = [
   {
     id: "lab",
     slug: "xuong-tool",
-    heading: shopeePriceTool.name,
-    intro: shopeePriceTool.description,
-    preview: shopeePriceFeatures.map(({ title }) => title),
-    entries: shopeePriceFeatures,
+    heading: "Kệ trưng bày công cụ",
+    intro: "Ghé bàn demo để xem các công cụ do TeaZ phát triển.",
+    preview: [shopeePriceTool.name, ...shopeePriceFeatures.map(({ title }) => title)],
+    entries: [{
+      title: shopeePriceTool.name,
+      description: shopeePriceTool.description,
+      cover: shopeePriceTool.cover,
+      link: { label: "Khám phá tiện ích", href: shopeePriceTool.path },
+    }],
     links: [
       { label: "Mở Chrome Web Store", href: shopeePriceTool.storeUrl },
       { label: "Xem video hướng dẫn", href: shopeePriceTool.guideUrl },
-      { label: "Cách cài và sử dụng", href: shopeePriceTool.path },
     ],
   },
   {
@@ -46,12 +50,14 @@ export const islandPlaces: readonly IslandPlace[] = [
   {
     id: "market",
     slug: "cho-tra",
-    heading: "Sản phẩm TeaZ giới thiệu",
-    intro: "Xem các sản phẩm từ video ghim của TeaZ trên TikTok.",
-    preview: products.map(({ categoryLabel }) => categoryLabel),
-    entries: products.map(({ name, description, reviewUrl }) => ({
+    heading: "Ghé quầy, xem review",
+    intro: "Chọn món bạn vừa thấy ở Chợ Trà để xem video của TeaZ hoặc đọc ghi chú trước khi mua.",
+    preview: products.map(({ name }) => name),
+    entries: products.map(({ name, description, reviewUrl, cover, slug }) => ({
       title: name,
       description,
+      cover,
+      notesUrl: `/review/${slug}.html`,
       link: { label: "Xem video review", href: reviewUrl },
     })),
     links: [

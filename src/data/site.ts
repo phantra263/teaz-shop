@@ -8,6 +8,8 @@
  */
 
 export interface Product {
+  slug: string;
+  viewingTip: string;
   id: number;
   name: string;
   category: Exclude<CategoryId, "all">;
@@ -43,35 +45,7 @@ export const categories = [
 
 export type CategoryId = (typeof categories)[number]["id"];
 
-export const products: Product[] = [
-  {
-    id: 3,
-    name: "Dầu nóng Hàn Quốc Antiphlamine có đầu lăn",
-    category: "personal-care",
-    categoryLabel: "Chăm sóc cá nhân",
-    description: "Video giới thiệu thiết kế chai và thanh lăn răng cưa gắn bên hông.",
-    cover: "/reviews/antiphlamine.avif",
-    reviewUrl: "https://www.tiktok.com/@teaz_shop/video/7712452283572899090",
-  },
-  {
-    id: 1,
-    name: "Xịt khoáng d’Alba White Truffle First Spray Serum",
-    category: "beauty",
-    categoryLabel: "Làm đẹp",
-    description: "Video giới thiệu tia xịt mịn và độ bóng nhẹ sau khi dùng.",
-    cover: "/reviews/dalba.avif",
-    reviewUrl: "https://www.tiktok.com/@teaz_shop/video/7710108122848808200",
-  },
-  {
-    id: 2,
-    name: "Bộ nồi chảo Redchef cán tháo rời",
-    category: "home",
-    categoryLabel: "Gia dụng",
-    description: "Bộ màu kem có cán tháo rời để xếp gọn. Video có đoạn áp chảo thử.",
-    cover: "/reviews/redchef.avif",
-    reviewUrl: "https://www.tiktok.com/@teaz_shop/video/7710962187103177991",
-  },
-];
+export { products } from "./products";
 
 export const aboutParagraphs = [
   "Mình là Trà Phan, người làm nội dung tại TeaZ. Mình chia sẻ góc nhìn về đồ làm đẹp, gia dụng, thời trang và công nghệ để bạn cân nhắc món nào hợp với nhu cầu của mình.",

@@ -151,6 +151,8 @@
 .island-place-entry h2 { color: var(--island-accent); font: 800 1.05rem/1.35 var(--font-display); }
 .island-place-entry p { flex: 1; margin: .45rem 0 0; color: var(--island-muted); font-size: .87rem; line-height: 1.56; }
 .island-place-entry .island-ui-button { margin-top: .82rem; }
+.island-market-cover { width: 100%; height: clamp(10rem, 27vh, 17rem); object-fit: cover; object-position: center 42%; border-radius: .45rem; margin-bottom: .85rem; }
+.island-market-notes { margin-top: .65rem; color: var(--island-accent); font-size: .85rem; text-decoration: underline; text-underline-offset: .2em; }
 
 @media (prefers-reduced-motion: no-preference) {
   .island-place-main { animation: island-place-enter .24s ease-out both; }
@@ -188,4 +190,12 @@
   .island-destination { min-height: 2.75rem; }
   .island-wildlife-button { min-height: 2.75rem; }
   .island-wildlife-button kbd { display: none; }
+}
+
+.island-tool-exhibit .island-market-cover { height: auto; object-fit: contain; }
+@media (min-width: 680px) {
+  .island-tool-exhibit { display: grid; grid-template-columns: 1.2fr 1fr; column-gap: 1.6rem; align-content: center; align-items: center; }
+  .island-tool-exhibit .island-market-cover { grid-row: 1 / 4; margin: 0; }
+  .island-tool-exhibit h2 { align-self: end; }
+  .island-tool-exhibit .island-ui-button { align-self: start; justify-self: start; }
 }

@@ -164,8 +164,8 @@ export function createIslandAnimals() {
   function duck(index: number) {
     const root = new Group();
     const drake = index === 0;
-    const wingTint = drake ? "#8b8576" : "#91724c";
-    const plumage = drake ? "#ada591" : "#a1845b";
+    const wingTint = drake ? "#918981" : index === 1 ? "#806044" : "#9a7956";
+    const plumage = drake ? "#b4aca0" : index === 1 ? "#a1845b" : "#bd9a70";
     const breast = drake ? "#7d4939" : "#c3a57b";
     const headTint = drake ? "#35715a" : "#886747";
     const body = assembly(root);
@@ -180,8 +180,9 @@ export function createIslandAnimals() {
         const x = side * (0.153 + Math.sin(feather * 0.54) * 0.06);
         body.oval([x, 0.158 + feather * 0.004, -0.154 + feather * 0.04], [0.032, 0.014, 0.122], drake ? "#a49d8d" : "#bb9561", -0.15, "#6a5749");
       }
-      body.oval([side * 0.208, 0.153, -0.118], [0.025, 0.023, 0.087], "#435075", 0.12, "#303450");
-      body.oval([side * 0.206, 0.169, -0.108], [0.023, 0.009, 0.099], "#e2d9c1");
+      // The blue wing patch sits between pale feather edges on a folded wing.
+      body.oval([side * 0.215, 0.152, -0.12], [0.026, 0.028, 0.104], "#e5dfc9", 0.14);
+      body.oval([side * 0.223, 0.154, -0.122], [0.025, 0.022, 0.092], "#365781", 0.14, "#30314f");
       body.oval([side * 0.041, 0.143, -0.35], [0.048, 0.018, 0.091], drake ? "#383736" : "#695444", 0.23);
     }
     body.finish();
@@ -193,7 +194,10 @@ export function createIslandAnimals() {
       [0.301, -0.007, 0.007, 0.007]], drake ? "#dba949" : "#bc8751", "#75522e");
     for (const side of [-1, 1]) {
       face.oval([side * 0.043, 0.025, 0.186], [0.006, 0.004, 0.012], "#473423");
-      if (!drake) face.oval([side * 0.079, 0.108, 0.059], [0.015, 0.011, 0.07], "#be9d75");
+      if (!drake) {
+        face.oval([side * 0.079, 0.108, 0.059], [0.015, 0.011, 0.07], "#d4b586");
+        face.taper([side * .094, .081, .051], [side * .071, .073, -.045], .009, "#574432");
+      }
     }
     face.finish();
     eyes(head, [0.077, 0.084, 0.087], "#2e2923", 0.02);
